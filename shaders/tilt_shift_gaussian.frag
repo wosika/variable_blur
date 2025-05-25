@@ -3,11 +3,13 @@ precision mediump float;
 
 #include <flutter/runtime_effect.glsl>
 
-uniform vec2 uViewSize;
-uniform float sigma;
-uniform float blurHeight; // Blur extent + direction (sign)
-uniform float blurAxis;   // 0.0 = vertical (Y-axis), 1.0 = horizontal (X-axis)
-uniform sampler2D uTexture;
+uniform vec2 uViewSize;     // Uses indices 0 (x) and 1 (y)
+uniform float sigma;         // Index 2
+uniform float topExtent;     // Index 3
+uniform float bottomExtent;  // Index 4
+uniform float leftExtent;    // Index 5
+uniform float rightExtent;   // Index 6
+uniform sampler2D uTexture; // Sampler (index 0)
 
 out vec4 FragColor;
 
@@ -21,31 +23,37 @@ void main() {
 
     vec4 color = vec4(texture(uTexture, uv).rgb, 1.0);
 
-    float absBlurHeight = abs(blurHeight);
-    bool isPositiveDirection = blurHeight >= 0.0;
+    // Calculate edge positions
+    float topEdge = topExtent * uViewSize.y;
+    float bottomEdge = (1.0 - bottomExtent) * uViewSize.y;
+    float leftEdge = leftExtent * uViewSize.x;
+    float rightEdge = (1.0 - rightExtent) * uViewSize.x;
 
-    // Determine axis (X or Y) and view size for that axis
-    float coord = (blurAxis < 0.5) ? fragCoord.y : fragCoord.x;
-    float viewSize = (blurAxis < 0.5) ? uViewSize.y : uViewSize.x;
-
-    // Check if fragment is in the blur region
-    bool inBlurRegion;
-    if (isPositiveDirection) {
-        inBlurRegion = coord < viewSize * absBlurHeight;
-    } else {
-        inBlurRegion = coord > viewSize * (1.0 - absBlurHeight);
-    }
+    // Check if fragment is in any blur region
+    bool inTop = topExtent > 0.0 && fragCoord.y < topEdge;
+    bool inBottom = bottomExtent > 0.0 && fragCoord.y > bottomEdge;
+    bool inLeft = leftExtent > 0.0 && fragCoord.x < leftEdge;
+    bool inRight = rightExtent > 0.0 && fragCoord.x > rightEdge;
+    bool inBlurRegion = inTop || inBottom || inLeft || inRight;
 
     if (inBlurRegion) {
+        // Calculate distance to the closest edge
+        float edgeDistance = 1e6; // Initialize with a large value
+        if (inTop) edgeDistance = min(edgeDistance, topEdge - fragCoord.y);
+        if (inBottom) edgeDistance = min(edgeDistance, fragCoord.y - bottomEdge);
+        if (inLeft) edgeDistance = min(edgeDistance, leftEdge - fragCoord.x);
+        if (inRight) edgeDistance = min(edgeDistance, fragCoord.x - rightEdge);
+
+        // Compute Gaussian blur
         const float shiftPower = 4.0;
-        const int mSize = 35;
+        const int mSize = 21;
         const int kSize = (mSize-1)/2;
         float kernel[mSize];
         vec3 final_colour = vec3(0.0);
 
         float Z = 0.00;
         for (int j = 0; j <= kSize; ++j)
-            kernel[kSize+j] = kernel[kSize-j] = normpdf(float(j), sigma );
+            kernel[kSize+j] = kernel[kSize-j] = normpdf(float(j), sigma);
 
         for (int j = 0; j < mSize; ++j)
             Z += kernel[j];
@@ -55,16 +63,8 @@ void main() {
                 final_colour += kernel[kSize+j]*kernel[kSize+i]*texture(uTexture, (fragCoord.xy+vec2(float(i),float(j))) / uViewSize).rgb;
         }
 
-        // Calculate distance from the edge (top/bottom or left/right)
-        float edgeDistance;
-        if (isPositiveDirection) {
-            edgeDistance = viewSize * absBlurHeight - coord;
-        } else {
-            edgeDistance = coord - viewSize * (1.0 - absBlurHeight);
-        }
-
-        // Blend factor for the effect
-        float val = clamp(shiftPower * abs(edgeDistance) / (viewSize * 0.3), 0.0, 1.0);
+        // Blend factor based on closest edge
+        float val = clamp(shiftPower * edgeDistance / (max(uViewSize.x, uViewSize.y) * 0.3), 0.0, 1.0);
         FragColor = vec4(final_colour/(Z*Z), 1.0) * val + color * (1.0 - val);
     } else {
         FragColor = color;

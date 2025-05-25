@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:variable_blur/variable_blur.dart';
+import 'dart:math' as math;
 
 class GradualBackgroundBlur extends StatefulWidget {
   const GradualBackgroundBlur({super.key});
@@ -67,7 +68,7 @@ class _GradualBackgroundBlurState extends State<GradualBackgroundBlur> {
                     }
                     if (index == 1) {
                       return Container(
-                        child: Image.asset('assets/rg.jpg', fit: BoxFit.cover),
+                        child: Image.network(getTempLink(), fit: BoxFit.cover),
                       );
                     }
                     return ListTile(title: Text(index.toString()));
@@ -115,11 +116,17 @@ class _GradualBackgroundBlurState extends State<GradualBackgroundBlur> {
       return child;
     } else {
       return VariableBlur(
-        progress: 4,
-        blurArea: -0.2,
-        axis: Axis.vertical,
+        sigma: 0, // Blur strength
+        blurSides: BlurSides.vertical(
+          top: 0, // Blur top 20%
+          bottom: 0.3, // Blur bottom 10%
+        ),
         child: child,
       );
     }
   }
+}
+
+String getTempLink({int height = 812, int width = 375}) {
+  return 'https://picsum.photos/$width/$height';
 }

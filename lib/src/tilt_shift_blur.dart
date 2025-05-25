@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
+import 'package:variable_blur/src/models/blur_side.dart';
 
 class VariableBlur extends StatelessWidget {
   const VariableBlur({
     super.key,
     required this.child,
-    required this.progress,
-    required this.blurArea, // Extent + direction (positive/negative)
-    required this.axis, // Axis.vertical or Axis.horizontal
+    required this.sigma,
+    required this.blurSides, // Replaces focusHeight and axis
   });
 
   final Widget child;
-  final double progress;
-  final double blurArea;
-  final Axis axis; // Determines blur direction (vertical/horizontal)
+  final double sigma;
+  final BlurSides blurSides; // Configure extents for each side
 
   @override
   Widget build(BuildContext context) {
     return ShaderBuilder((context, shader, _) {
       return AnimatedSampler((image, size, canvas) {
-        shader.setFloat(0, size.width); // uViewSize.x
-        shader.setFloat(1, size.height); // uViewSize.y
-        shader.setFloat(2, progress); // sigma
-        shader.setFloat(3, blurArea); // blurHeight (extent + direction)
-        shader.setFloat(4, axis == Axis.horizontal ? 1.0 : 0.0); // blurAxis
+        // Pass all four extents to the shader
+        shader
+          ..setFloat(0, size.width) // uViewSize.x
+          ..setFloat(1, size.height) // uViewSize.y
+          ..setFloat(2, sigma) // sigma
+          ..setFloat(3, blurSides.top)
+          ..setFloat(4, blurSides.bottom)
+          ..setFloat(5, blurSides.left)
+          ..setFloat(6, blurSides.right);
 
         shader.setImageSampler(0, image); // uTexture
         canvas.drawRect(
