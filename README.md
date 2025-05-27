@@ -189,26 +189,3 @@ Run the example app:
 cd example
 flutter run
 ```
-
-## Additional Information
-
-### Contributing
-
-Contributions are welcome! Please read our contributing guidelines and submit pull requests to our [GitHub repository](https://github.com/yourusername/variable_blur).
-
-### Issues and Support
-
-If you encounter any issues or have questions:
-
-1. Check the [documentation](https://github.com/yourusername/variable_blur/wiki)
-2. Search existing [issues](https://github.com/yourusername/variable_blur/issues)
-3. Create a new issue with a detailed description and reproduction steps
-
-### License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### Credits
-
-- Built using [flutter_shaders](https://pub.dev/packages/flutter_shaders) for GPU-accelerated rendering
-- Inspired by tilt-shift photography techniques and modern UI design patterns
