@@ -1,6 +1,8 @@
 name: variable_blur
 description: "A new Flutter package project."
 version: 0.0.1
+homepage: https://github.com/yourusername/variable_blur
+repository: https://github.com/yourusername/variable_blur
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
