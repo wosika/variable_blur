@@ -26,7 +26,8 @@ flutter:
   uses-material-design: true
   # To add assets to your package, add an assets section, like this:
   shaders:
-    - shaders/tilt_shift_gaussian.frag
+    - shaders/tilt_shift_horizontal.frag
+    - shaders/tilt_shift_vertical.frag
     
   #
   # For details regarding assets in packages, see

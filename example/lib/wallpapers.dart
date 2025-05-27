@@ -14,8 +14,8 @@ class Wallpapers extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             VariableBlur(
-              sigma: 20,
-              blurSides: BlurSides.vertical(top: 0.22),
+              sigma: 10,
+              blurSides: BlurSides.vertical(top: 0.27),
               // blurTint: Colors.yellowAccent,
               child: GridView.count(
                 crossAxisCount: 2,
@@ -91,38 +91,38 @@ class Wallpapers extends StatelessWidget {
                 ],
               ),
             ),
-            SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 28,
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[800],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Abstract',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                          Icon(Icons.close, color: Colors.white, size: 30),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // SafeArea(
+            //   child: Column(
+            //     children: [
+            //       Padding(
+            //         padding: const EdgeInsets.symmetric(
+            //           vertical: 8,
+            //           horizontal: 28,
+            //         ),
+            //         child: Container(
+            //           padding: const EdgeInsets.symmetric(
+            //             horizontal: 24,
+            //             vertical: 24,
+            //           ),
+            //           decoration: BoxDecoration(
+            //             color: Colors.grey[800],
+            //             borderRadius: BorderRadius.circular(20),
+            //           ),
+            //           child: const Row(
+            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //             children: [
+            //               Text(
+            //                 'Abstract',
+            //                 style: TextStyle(color: Colors.white, fontSize: 18),
+            //               ),
+            //               Icon(Icons.close, color: Colors.white, size: 30),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),
