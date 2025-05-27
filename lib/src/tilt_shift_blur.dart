@@ -10,12 +10,14 @@ class VariableBlur extends StatelessWidget {
     required this.sigma,
     required this.blurSides,
     this.blurTint = const Color(0xFFFFFFFF),
+    this.quality = BlurQuality.high, // Add quality control
   });
 
   final Widget child;
   final double sigma;
   final BlurSides blurSides;
   final Color blurTint;
+  final BlurQuality quality; // New parameter
 
   @override
   Widget build(BuildContext context) {
@@ -60,11 +62,12 @@ class VariableBlur extends StatelessWidget {
       ui.FragmentShader shader, ui.Image image, Size size) {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
+    final adjustedSigma = _getAdjustedSigma();
 
     shader
       ..setFloat(0, size.width)
       ..setFloat(1, size.height)
-      ..setFloat(2, sigma)
+      ..setFloat(2, adjustedSigma)
       ..setFloat(3, blurSides.top)
       ..setFloat(4, blurSides.bottom)
       ..setFloat(5, blurSides.left)
@@ -79,4 +82,17 @@ class VariableBlur extends StatelessWidget {
 
     return recorder.endRecording();
   }
+
+  double _getAdjustedSigma() {
+    switch (quality) {
+      case BlurQuality.low:
+        return sigma * 0.5; // Reduce blur intensity for performance
+      case BlurQuality.medium:
+        return sigma * 0.75;
+      case BlurQuality.high:
+        return sigma;
+    }
+  }
 }
+
+enum BlurQuality { low, medium, high }
