@@ -63,7 +63,6 @@ Create a tilt-shift blur effect for depth-of-field photography:
 VariableBlur(
   sigma: 8.0,
   blurSides: BlurSides.vertical(top: 1.0, bottom: 1.0),
-  blurTint: Color(0x20FFFFFF),
   quality: BlurQuality.high,
   child: Image.asset('assets/landscape.jpg'),
 )
@@ -141,13 +140,12 @@ BlurSides._(top: 0.2, bottom: 0.8, left: 0.0, right: 1.0)
 
 The main widget for applying variable blur effects.
 
-| Parameter   | Type          | Default             | Description                                            |
-| ----------- | ------------- | ------------------- | ------------------------------------------------------ |
-| `child`     | `Widget`      | required            | The widget to apply blur effects to                    |
-| `sigma`     | `double`      | required            | The blur intensity (0.0 = no blur, higher = more blur) |
-| `blurSides` | `BlurSides`   | required            | Configuration for which sides to blur                  |
-| `blurTint`  | `Color`       | `Color(0xFFFFFFFF)` | Color tint to apply to the blur effect                 |
-| `quality`   | `BlurQuality` | `BlurQuality.high`  | Quality setting for performance optimization           |
+| Parameter   | Type          | Default            | Description                                            |
+| ----------- | ------------- | ------------------ | ------------------------------------------------------ |
+| `child`     | `Widget`      | required           | The widget to apply blur effects to                    |
+| `sigma`     | `double`      | required           | The blur intensity (0.0 = no blur, higher = more blur) |
+| `blurSides` | `BlurSides`   | required           | Configuration for which sides to blur                  |
+| `quality`   | `BlurQuality` | `BlurQuality.high` | Quality setting for performance optimization           |
 
 ### BlurSides
 

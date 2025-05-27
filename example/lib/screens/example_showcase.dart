@@ -1,31 +1,10 @@
-import 'package:example/screens/blur_transitions.dart';
-import 'package:example/screens/performance_comparison.dart';
-import 'package:example/screens/scroll_blur_header.dart';
-import 'package:example/screens/tilt_shift_photography.dart';
-import 'package:example/screens/wallpaper_gallery.dart';
-import 'package:flutter/material.dart';
 import 'package:example/screens/gradual_top_blur.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Variable Blur Examples',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const ExampleShowcase(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
+import 'package:flutter/material.dart';
+import 'tilt_shift_photography.dart';
+import 'scroll_blur_header.dart';
+import 'wallpaper_gallery.dart';
+import 'blur_transitions.dart';
+import 'performance_comparison.dart';
 
 class ExampleShowcase extends StatelessWidget {
   const ExampleShowcase({super.key});

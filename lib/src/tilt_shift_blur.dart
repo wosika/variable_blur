@@ -9,18 +9,20 @@ class VariableBlur extends StatelessWidget {
     required this.child,
     required this.sigma,
     required this.blurSides,
-    this.blurTint = const Color(0xFFFFFFFF),
     this.quality = BlurQuality.high, // Add quality control
   });
 
   final Widget child;
   final double sigma;
   final BlurSides blurSides;
-  final Color blurTint;
   final BlurQuality quality; // New parameter
 
   @override
   Widget build(BuildContext context) {
+    if (sigma <= 0) {
+      return child;
+    }
+
     return ShaderBuilder((context, horizontalShader, _) {
       return ShaderBuilder((context, verticalShader, _) {
         return AnimatedSampler((image, size, canvas) {
@@ -38,11 +40,7 @@ class VariableBlur extends StatelessWidget {
             ..setFloat(3, blurSides.top)
             ..setFloat(4, blurSides.bottom)
             ..setFloat(5, blurSides.left)
-            ..setFloat(6, blurSides.right)
-            ..setFloat(7, blurTint.r)
-            ..setFloat(8, blurTint.g)
-            ..setFloat(9, blurTint.b)
-            ..setFloat(10, blurTint.a);
+            ..setFloat(6, blurSides.right);
 
           verticalShader.setImageSampler(0, horizontalImage);
           verticalShader.setImageSampler(1, image); // Original for blending

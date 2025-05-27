@@ -9,7 +9,6 @@ uniform float topExtent;
 uniform float bottomExtent;
 uniform float leftExtent;
 uniform float rightExtent;
-uniform vec4 blurTint;
 uniform sampler2D uTexture;
 uniform sampler2D uOriginalTexture;
 
@@ -64,7 +63,7 @@ void main() {
         weightSum += weight;
     }
     
-    vec3 blurred = (result / weightSum) * blurTint.rgb;
+    vec3 blurred = result / weightSum;
     
     // Smooth edge transition
     float maxDimension = max(uViewSize.x, uViewSize.y);
@@ -72,6 +71,6 @@ void main() {
     float blendFactor = smoothstep(0.0, 1.0, edgeDistance / transitionWidth);
     
     // Final blending
-    vec4 blurredColor = vec4(blurred, blurTint.a);
+    vec4 blurredColor = vec4(blurred, 1.0);
     FragColor = mix(originalColor, blurredColor, blendFactor);
 }

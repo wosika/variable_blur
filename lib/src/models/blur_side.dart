@@ -12,8 +12,8 @@ class BlurSides {
   });
 
   const BlurSides.horizontal({double left = 0.0, double right = 0.0})
-    : this._(left: left, right: right);
+      : this._(left: left, right: right);
 
   const BlurSides.vertical({double top = 0.0, double bottom = 0.0})
-    : this._(top: top, bottom: bottom);
+      : this._(top: top, bottom: bottom);
 }
