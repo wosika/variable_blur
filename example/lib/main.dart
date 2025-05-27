@@ -1,5 +1,6 @@
 import 'package:example/gradual_background_blur.dart';
 import 'package:example/imaged_background.dart';
+import 'package:example/wallpapers.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,6 +12,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Flutter Demo', home: ImagedBackground());
+    return MaterialApp(title: 'Flutter Demo', home: Wallpapers());
   }
 }

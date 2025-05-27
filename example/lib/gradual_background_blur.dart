@@ -116,6 +116,7 @@ class _GradualBackgroundBlurState extends State<GradualBackgroundBlur> {
       return child;
     } else {
       return VariableBlur(
+        blurTint: Colors.red,
         sigma: 0, // Blur strength
         blurSides: BlurSides.vertical(
           top: 0, // Blur top 20%

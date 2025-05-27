@@ -3,12 +3,13 @@ precision mediump float;
 
 #include <flutter/runtime_effect.glsl>
 
-uniform vec2 uViewSize;     // Uses indices 0 (x) and 1 (y)
+uniform vec2 uViewSize;     // Indices 0 (x), 1 (y)
 uniform float sigma;         // Index 2
 uniform float topExtent;     // Index 3
 uniform float bottomExtent;  // Index 4
 uniform float leftExtent;    // Index 5
 uniform float rightExtent;   // Index 6
+uniform vec4 blurTint;       // Index 7 (RGBA)
 uniform sampler2D uTexture; // Sampler (index 0)
 
 out vec4 FragColor;
@@ -29,7 +30,7 @@ void main() {
     float leftEdge = leftExtent * uViewSize.x;
     float rightEdge = (1.0 - rightExtent) * uViewSize.x;
 
-    // Check if fragment is in any blur region
+    // Check blur regions
     bool inTop = topExtent > 0.0 && fragCoord.y < topEdge;
     bool inBottom = bottomExtent > 0.0 && fragCoord.y > bottomEdge;
     bool inLeft = leftExtent > 0.0 && fragCoord.x < leftEdge;
@@ -37,35 +38,44 @@ void main() {
     bool inBlurRegion = inTop || inBottom || inLeft || inRight;
 
     if (inBlurRegion) {
-        // Calculate distance to the closest edge
-        float edgeDistance = 1e6; // Initialize with a large value
+        // Distance to closest edge
+        float edgeDistance = 1e6;
         if (inTop) edgeDistance = min(edgeDistance, topEdge - fragCoord.y);
         if (inBottom) edgeDistance = min(edgeDistance, fragCoord.y - bottomEdge);
         if (inLeft) edgeDistance = min(edgeDistance, leftEdge - fragCoord.x);
         if (inRight) edgeDistance = min(edgeDistance, fragCoord.x - rightEdge);
 
-        // Compute Gaussian blur
-        const float shiftPower = 4.0;
+        // Gaussian blur computation
         const int mSize = 21;
         const int kSize = (mSize-1)/2;
         float kernel[mSize];
         vec3 final_colour = vec3(0.0);
 
-        float Z = 0.00;
+        float Z = 0.0;
         for (int j = 0; j <= kSize; ++j)
             kernel[kSize+j] = kernel[kSize-j] = normpdf(float(j), sigma);
 
         for (int j = 0; j < mSize; ++j)
             Z += kernel[j];
 
-        for (int i=-kSize; i <= kSize; ++i) {
-            for (int j=-kSize; j <= kSize; ++j)
-                final_colour += kernel[kSize+j]*kernel[kSize+i]*texture(uTexture, (fragCoord.xy+vec2(float(i),float(j))) / uViewSize).rgb;
+        for (int i = -kSize; i <= kSize; ++i) {
+            for (int j = -kSize; j <= kSize; ++j) {
+                final_colour += kernel[kSize+j] * kernel[kSize+i] * 
+                    texture(uTexture, (fragCoord.xy + vec2(float(i), float(j))) / uViewSize).rgb;
+            }
         }
 
-        // Blend factor based on closest edge
-        float val = clamp(shiftPower * edgeDistance / (max(uViewSize.x, uViewSize.y) * 0.3), 0.0, 1.0);
-        FragColor = vec4(final_colour/(Z*Z), 1.0) * val + color * (1.0 - val);
+        vec3 blurred = final_colour.rgb / (Z * Z);
+        blurred *= blurTint.rgb;
+
+        // Smooth edge transition
+        float maxDimension = max(uViewSize.x, uViewSize.y);
+        float transitionWidth = maxDimension * 0.15;
+        float val = smoothstep(0.0, 1.0, edgeDistance / transitionWidth);
+
+        // Final blending with premultiplied alpha
+        vec4 blurredColor = vec4(blurred * blurTint.rgb, blurTint.a);
+        FragColor = mix(color, blurredColor, val);
     } else {
         FragColor = color;
     }
