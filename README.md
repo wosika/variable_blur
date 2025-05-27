@@ -1,39 +1,214 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Variable Blur
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+A Flutter package that provides customizable blur effects including tilt-shift blur for creating depth-of-field and variable blur effects in your Flutter applications.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **Variable Blur Effects**: Apply blur effects with different intensities on different sides of a widget
+- **Tilt-Shift Blur**: Create professional depth-of-field effects similar to tilt-shift photography
+- **Customizable Blur Sides**: Control blur intensity independently on top, bottom, left, and right sides
+- **Performance Optimized**: Uses GPU shaders for smooth, high-performance blur rendering
+- **Color Tinting**: Add custom color tints to blur effects
+- **Quality Control**: Adjustable quality settings for performance optimization
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Add this package to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  variable_blur: ^0.0.1
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+Import the package in your Dart code:
+
+```dart
+import 'package:variable_blur/variable_blur.dart';
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+### Basic Variable Blur
+
+Wrap any widget with `VariableBlur` to apply customizable blur effects:
 
 ```dart
-const like = 'sample';
+VariableBlur(
+  sigma: 5.0,
+  blurSides: BlurSides.horizontal(left: 1.0, right: 1.0),
+  child: Container(
+    width: 200,
+    height: 200,
+    decoration: BoxDecoration(
+      image: DecorationImage(
+        image: AssetImage('assets/your_image.jpg'),
+        fit: BoxFit.cover,
+      ),
+    ),
+  ),
+)
 ```
 
-## Additional information
+### Tilt-Shift Photography Effect
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+Create a tilt-shift blur effect for depth-of-field photography:
+
+```dart
+VariableBlur(
+  sigma: 8.0,
+  blurSides: BlurSides.vertical(top: 1.0, bottom: 1.0),
+  blurTint: Color(0x20FFFFFF),
+  quality: BlurQuality.high,
+  child: Image.asset('assets/landscape.jpg'),
+)
+```
+
+### Dynamic Scroll-Based Blur
+
+Create dynamic blur effects that respond to user interactions:
+
+```dart
+class ScrollBlurExample extends StatefulWidget {
+  @override
+  _ScrollBlurExampleState createState() => _ScrollBlurExampleState();
+}
+
+class _ScrollBlurExampleState extends State<ScrollBlurExample> {
+  double blurSigma = 0.0;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    const maxBlur = 8.0;
+    const scrollThreshold = 200.0;
+
+    setState(() {
+      blurSigma = maxBlur * (_scrollController.offset / scrollThreshold).clamp(0.0, 1.0);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverAppBar(
+          expandedHeight: 300,
+          flexibleSpace: VariableBlur(
+            sigma: blurSigma,
+            blurSides: BlurSides.vertical(bottom: 1.0),
+            child: FlexibleSpaceBar(
+              background: Image.asset('assets/header_image.jpg', fit: BoxFit.cover),
+            ),
+          ),
+        ),
+        // Your scrollable content here
+      ],
+    );
+  }
+}
+```
+
+### Blur Sides Configuration
+
+Control blur intensity on different sides:
+
+```dart
+// Horizontal blur only
+BlurSides.horizontal(left: 0.5, right: 0.8)
+
+// Vertical blur only
+BlurSides.vertical(top: 1.0, bottom: 0.3)
+
+// Custom configuration for all sides
+BlurSides._(top: 0.2, bottom: 0.8, left: 0.0, right: 1.0)
+```
+
+## API Reference
+
+### VariableBlur
+
+The main widget for applying variable blur effects.
+
+| Parameter   | Type          | Default             | Description                                            |
+| ----------- | ------------- | ------------------- | ------------------------------------------------------ |
+| `child`     | `Widget`      | required            | The widget to apply blur effects to                    |
+| `sigma`     | `double`      | required            | The blur intensity (0.0 = no blur, higher = more blur) |
+| `blurSides` | `BlurSides`   | required            | Configuration for which sides to blur                  |
+| `blurTint`  | `Color`       | `Color(0xFFFFFFFF)` | Color tint to apply to the blur effect                 |
+| `quality`   | `BlurQuality` | `BlurQuality.high`  | Quality setting for performance optimization           |
+
+### BlurSides
+
+Configuration class for controlling blur on different sides.
+
+#### Constructors
+
+- `BlurSides.horizontal({double left, double right})` - Apply blur horizontally
+- `BlurSides.vertical({double top, double bottom})` - Apply blur vertically
+- `BlurSides._({double top, double bottom, double left, double right})` - Custom configuration
+
+### BlurQuality
+
+Enum for controlling blur quality vs performance:
+
+- `BlurQuality.low` - Faster rendering, lower quality
+- `BlurQuality.medium` - Balanced quality and performance
+- `BlurQuality.high` - Best quality, slower rendering
+
+## Performance Tips
+
+1. **Use appropriate quality settings**: Lower quality settings for animations, higher for static effects
+2. **Limit blur sigma values**: Very high sigma values (>15) can impact performance
+3. **Consider widget tree placement**: Apply blur as close to the target widget as possible
+4. **Cache blur effects**: For static content, consider using RepaintBoundary
+
+## Examples
+
+The package includes several examples in the `/example` folder:
+
+- Basic variable blur effects
+- Tilt-shift photography simulation
+- Scroll-responsive blur backgrounds
+- Performance optimization techniques
+
+Run the example app:
+
+```bash
+cd example
+flutter run
+```
+
+## Additional Information
+
+### Contributing
+
+Contributions are welcome! Please read our contributing guidelines and submit pull requests to our [GitHub repository](https://github.com/yourusername/variable_blur).
+
+### Issues and Support
+
+If you encounter any issues or have questions:
+
+1. Check the [documentation](https://github.com/yourusername/variable_blur/wiki)
+2. Search existing [issues](https://github.com/yourusername/variable_blur/issues)
+3. Create a new issue with a detailed description and reproduction steps
+
+### License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Credits
+
+- Built using [flutter_shaders](https://pub.dev/packages/flutter_shaders) for GPU-accelerated rendering
+- Inspired by tilt-shift photography techniques and modern UI design patterns
