@@ -46,7 +46,7 @@ void main() {
         if (inRight) edgeDistance = min(edgeDistance, fragCoord.x - rightEdge);
 
         // Gaussian blur computation
-        const int mSize = 21;
+        const int mSize = 35;
         const int kSize = (mSize-1)/2;
         float kernel[mSize];
         vec3 final_colour = vec3(0.0);
