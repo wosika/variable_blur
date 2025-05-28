@@ -278,7 +278,7 @@ class _BlurTransitionsState extends State<BlurTransitions>
           builder: (context, child) {
             return VariableBlur(
               sigma: _fadeAnimation.value,
-              blurSides: BlurSides.vertical(top: 0.5, bottom: 0.5),
+              blurSides: BlurSides.vertical(top: 0.5, bottom: 0.35),
               child: Stack(
                 fit: StackFit.expand,
                 children: [

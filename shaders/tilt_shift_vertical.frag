@@ -9,6 +9,7 @@ uniform float topExtent;
 uniform float bottomExtent;
 uniform float leftExtent;
 uniform float rightExtent;
+uniform float isAndroid;
 uniform sampler2D uTexture;
 uniform sampler2D uOriginalTexture;
 
@@ -21,6 +22,11 @@ float getGaussianWeight(int offset, float sig) {
 void main() {
     vec2 fragCoord = FlutterFragCoord().xy;
     vec2 uv = fragCoord / uViewSize;
+    
+    // Fix coordinate system for cross-platform compatibility
+    if (isAndroid > 0.5) {
+        uv.y = 1.0 - uv.y;
+    }
     
     vec4 originalColor = texture(uOriginalTexture, uv);
     vec4 horizontalBlurred = texture(uTexture, uv);
@@ -58,8 +64,9 @@ void main() {
     // Vertical blur pass
     for (int j = -kSize; j <= kSize; ++j) {
         vec2 offset = vec2(0.0, float(j) / uViewSize.y);
+        vec2 sampleUV = uv + offset;
         float weight = getGaussianWeight(j, sigma);
-        result += texture(uTexture, uv + offset).rgb * weight;
+        result += texture(uTexture, sampleUV).rgb * weight;
         weightSum += weight;
     }
     

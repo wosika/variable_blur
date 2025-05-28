@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'package:variable_blur/src/models/blur_side.dart';
@@ -16,6 +18,16 @@ class VariableBlur extends StatelessWidget {
   final double sigma;
   final BlurSides blurSides;
   final BlurQuality quality; // New parameter
+
+  // Platform detection helper
+  // Android and iOS have different coordinate systems:
+  // - iOS: (0,0) is at bottom-left
+  // - Android: (0,0) is at top-left
+  // This flag helps the shaders handle the difference correctly
+  bool get _isAndroid {
+    if (kIsWeb) return false;
+    return Platform.isAndroid;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +52,8 @@ class VariableBlur extends StatelessWidget {
             ..setFloat(3, blurSides.top)
             ..setFloat(4, blurSides.bottom)
             ..setFloat(5, blurSides.left)
-            ..setFloat(6, blurSides.right);
+            ..setFloat(6, blurSides.right)
+            ..setFloat(7, _isAndroid ? 1.0 : 0.0); // Platform flag
 
           verticalShader.setImageSampler(0, horizontalImage);
           verticalShader.setImageSampler(1, image); // Original for blending
@@ -69,7 +82,8 @@ class VariableBlur extends StatelessWidget {
       ..setFloat(3, blurSides.top)
       ..setFloat(4, blurSides.bottom)
       ..setFloat(5, blurSides.left)
-      ..setFloat(6, blurSides.right);
+      ..setFloat(6, blurSides.right)
+      ..setFloat(7, _isAndroid ? 1.0 : 0.0); // Platform flag
 
     shader.setImageSampler(0, image);
 

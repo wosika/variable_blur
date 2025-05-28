@@ -10,7 +10,7 @@ class GradualTopBlur extends StatefulWidget {
 
 class _GradualTopBlurState extends State<GradualTopBlur> {
   final ScrollController _scrollController = ScrollController();
-  double _blurIntensity = 1.0;
+  double _blurIntensity = 0.0;
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Gradual Background Blur'),
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -53,7 +53,7 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
         sigma: _blurIntensity,
         blurSides: BlurSides.vertical(top: 0.3),
         child: Container(
-          color: Colors.grey,
+          color: Colors.black,
           child: ListView(
             controller: _scrollController,
             padding: const EdgeInsets.only(top: 100),
