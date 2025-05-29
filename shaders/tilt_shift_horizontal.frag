@@ -10,13 +10,15 @@ uniform float bottomExtent;
 uniform float leftExtent;
 uniform float rightExtent;
 uniform float isAndroid;
+uniform float edgeIntensity;
 uniform sampler2D uTexture;
 
 out vec4 FragColor;
 
-// Precomputed Gaussian weights for common sigma values
+// Optimized Gaussian weight calculation
 float getGaussianWeight(int offset, float sig) {
-    return 0.39894 * exp(-0.5 * float(offset * offset) / (sig * sig)) / sig;
+    float x = float(offset);
+    return exp(-0.5 * x * x / (sig * sig));
 }
 
 void main() {
@@ -48,8 +50,11 @@ void main() {
         return;
     }
     
-    // Adaptive kernel size based on sigma
-    int kSize = min(int(ceil(3.0 * sigma)), 17);
+    // Adaptive kernel size - removed the hard limit of 17
+    int kSize = int(ceil(3.0 * sigma));
+    // Cap at reasonable maximum for performance (can be increased if needed)
+    kSize = min(kSize, 50);
+    
     vec3 result = vec3(0.0);
     float weightSum = 0.0;
     

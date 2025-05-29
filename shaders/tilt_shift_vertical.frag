@@ -10,13 +10,16 @@ uniform float bottomExtent;
 uniform float leftExtent;
 uniform float rightExtent;
 uniform float isAndroid;
+uniform float edgeIntensity;
 uniform sampler2D uTexture;
 uniform sampler2D uOriginalTexture;
 
 out vec4 FragColor;
 
+// Optimized Gaussian weight calculation
 float getGaussianWeight(int offset, float sig) {
-    return 0.39894 * exp(-0.5 * float(offset * offset) / (sig * sig)) / sig;
+    float x = float(offset);
+    return exp(-0.5 * x * x / (sig * sig));
 }
 
 void main() {
@@ -56,8 +59,11 @@ void main() {
     if (inLeft) edgeDistance = min(edgeDistance, leftEdge - fragCoord.x);
     if (inRight) edgeDistance = min(edgeDistance, fragCoord.x - rightEdge);
     
-    // Adaptive kernel size
-    int kSize = min(int(ceil(3.0 * sigma)), 17);
+    // Adaptive kernel size - removed the hard limit of 17
+    int kSize = int(ceil(3.0 * sigma));
+    // Cap at reasonable maximum for performance (can be increased if needed)
+    kSize = min(kSize, 50);
+    
     vec3 result = vec3(0.0);
     float weightSum = 0.0;
     
@@ -74,7 +80,7 @@ void main() {
     
     // Smooth edge transition
     float maxDimension = max(uViewSize.x, uViewSize.y);
-    float transitionWidth = maxDimension * 0.15;
+    float transitionWidth = maxDimension * edgeIntensity;
     float blendFactor = smoothstep(0.0, 1.0, edgeDistance / transitionWidth);
     
     // Final blending
