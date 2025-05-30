@@ -1,35 +1,27 @@
-import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'package:variable_blur/src/models/blur_side.dart';
 
 class VariableBlur extends StatelessWidget {
-  const VariableBlur({
-    super.key,
-    required this.child,
-    required this.sigma,
-    required this.blurSides,
-    this.quality = BlurQuality.high, // Add quality control
-    this.edgeIntensity = 0.15, // 15% of screen size for smooth transition
-  });
+  const VariableBlur(
+      {super.key,
+      required this.child,
+      required this.sigma,
+      required this.blurSides,
+      this.quality = BlurQuality.high, // Add quality control
+      this.edgeIntensity = 0.15, // 15% of screen size for smooth transition
+      this.isYFlipNeed = false});
 
   final Widget child;
   final double sigma;
   final BlurSides blurSides;
   final BlurQuality quality; // New parameter
   final double edgeIntensity; // Controls smooth transition intensity
-
-  // Platform detection helper
-  // Android and iOS have different coordinate systems:
-  // - iOS: (0,0) is at bottom-left
-  // - Android: (0,0) is at top-left
-  // This flag helps the shaders handle the difference correctly
-  bool get _isAndroid {
-    if (kIsWeb) return false;
-    return Platform.isAndroid;
-  }
+  ///Some android devices use different co-ordinates x,y for rendering
+  ///So for this reason on some android device when you apply this blur it will flip the widget on which you applied
+  ///Fot that specific device pass [isYFlipNeed] true
+  final bool isYFlipNeed;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +47,7 @@ class VariableBlur extends StatelessWidget {
             ..setFloat(4, blurSides.bottom)
             ..setFloat(5, blurSides.left)
             ..setFloat(6, blurSides.right)
-            ..setFloat(7, _isAndroid ? 1.0 : 0.0)
+            ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
             ..setFloat(8, edgeIntensity);
 
           verticalShader.setImageSampler(0, horizontalImage);
@@ -85,7 +77,7 @@ class VariableBlur extends StatelessWidget {
       ..setFloat(4, blurSides.bottom)
       ..setFloat(5, blurSides.left)
       ..setFloat(6, blurSides.right)
-      ..setFloat(7, _isAndroid ? 1.0 : 0.0);
+      ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0);
 
     shader.setImageSampler(0, image);
 

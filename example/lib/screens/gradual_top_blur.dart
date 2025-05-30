@@ -51,6 +51,7 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
       ),
       body: VariableBlur(
         sigma: _blurIntensity,
+        isYFlipNeed: false,
         blurSides: BlurSides.vertical(top: 0.3),
         child: Container(
           color: Colors.black,
