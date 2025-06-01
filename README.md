@@ -2,6 +2,16 @@
 
 A Flutter package that provides customizable blur effects including tilt-shift blur for creating depth-of-field and variable blur effects in your Flutter applications.
 
+## Screenshots
+
+| Tilt-Shift Effect | Horizontal Blur | Vertical Blur |
+|-------------------|-----------------|---------------|
+| ![Tilt-Shift](screen_shots/1.png) | ![Horizontal](screen_shots/2.png) | ![Vertical](screen_shots/3.png) |
+
+| Dynamic Blur | Quality Comparison | Custom Effects |
+|-------------|-------------------|----------------|
+| ![Dynamic](screen_shots/4.png) | ![Quality](screen_shots/5.png) | ![Custom](screen_shots/6.png) |
+
 ## Features
 
 - **Variable Blur Effects**: Apply blur effects with different intensities on different sides of a widget
@@ -180,6 +190,15 @@ The package includes several examples in the `/example` folder:
 - Tilt-shift photography simulation
 - Scroll-responsive blur backgrounds
 - Performance optimization techniques
+
+### Visual Examples
+
+| Effect Type | Description |
+|------------|-------------|
+| **Tilt-Shift Blur** | Professional depth-of-field effects similar to tilt-shift photography |
+| **Horizontal Blur** | Apply blur effects horizontally for creative transitions |
+| **Vertical Blur** | Vertical blur effects perfect for scroll-based animations |
+| **Dynamic Effects** | Real-time blur adjustments based on user interactions |
 
 Run the example app:
 

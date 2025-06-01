@@ -1,3 +1,12 @@
+## 0.0.5
+- **DOCUMENTATION**: Comprehensive API documentation added to meet pub.dev standards (20%+ coverage achieved)
+- **NEW**: Added detailed dartdoc comments for all public API elements
+- **IMPROVED**: Enhanced library-level documentation with features overview and usage examples
+- **ADDED**: Important compatibility notes - blur effects only work on images or colored containers
+- **ENHANCED**: Detailed class and method documentation with performance considerations
+- **QUALITY**: Added comprehensive examples and best practices in documentation
+- **REFERENCES**: Clear references to example app for implementation guidance
+
 ## 0.0.4
 
 - **BREAKING FIX**: Fixed coordinate system compatibility between iOS and Android platforms
