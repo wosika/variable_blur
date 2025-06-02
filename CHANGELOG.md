@@ -1,3 +1,14 @@
+
+
+## 0.0.6
+
+- **VISUAL**: Added comprehensive screenshot gallery to README.md for better pub.dev presentation
+- **IMPROVED**: Enhanced README.md with visual examples showcasing different blur effects
+- **OPTIMIZED**: Refined package description to meet pub.dev character limits (60-180 chars)
+- **ENHANCED**: Added organized image gallery displaying tilt-shift, horizontal, vertical, and dynamic blur effects
+- **PRESENTATION**: Improved package discoverability with prominent visual examples in documentation
+- **POLISH**: Better structured README layout for professional pub.dev package listing
+
 ## 0.0.5
 - **DOCUMENTATION**: Comprehensive API documentation added to meet pub.dev standards (20%+ coverage achieved)
 - **NEW**: Added detailed dartdoc comments for all public API elements

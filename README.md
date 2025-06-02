@@ -4,13 +4,13 @@ A Flutter package that provides customizable blur effects including tilt-shift b
 
 ## Screenshots
 
-| Tilt-Shift Effect | Horizontal Blur | Vertical Blur |
+| Example 1 | Example 2 | Example 3 (blur with scroll) |
 |-------------------|-----------------|---------------|
-| ![Tilt-Shift](screen_shots/1.png) | ![Horizontal](screen_shots/2.png) | ![Vertical](screen_shots/3.png) |
+| ![Dynamic](screen_shots/4.png) | ![Horizontal](screen_shots/2.png) | ![Vertical](screen_shots/3.png) |
 
-| Dynamic Blur | Quality Comparison | Custom Effects |
-|-------------|-------------------|----------------|
-| ![Dynamic](screen_shots/4.png) | ![Quality](screen_shots/5.png) | ![Custom](screen_shots/6.png) |
+| Example 4 (Blurred Header) | Performance comparison |
+|-------------------|----------------|
+| ![Quality](screen_shots/5.png) | ![Custom](screen_shots/6.png) |
 
 ## Features
 
