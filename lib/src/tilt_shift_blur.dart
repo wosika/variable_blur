@@ -69,7 +69,7 @@ class VariableBlur extends StatelessWidget {
       required this.blurSides,
       this.quality = BlurQuality.high, // Add quality control
       this.edgeIntensity = 0.15, // 15% of screen size for smooth transition
-      this.kernelSize = 15.0, // Default kernel size
+      this.kernelSize = 25, // Default kernel size
       this.isYFlipNeed = false});
 
   /// The widget to apply the blur effect to.

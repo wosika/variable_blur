@@ -140,6 +140,7 @@ BlurSides.horizontal(left: 0.5, right: 0.8)
 
 // Vertical blur only
 BlurSides.vertical(top: 1.0, bottom: 0.3)
+```
 
 ## API Reference
 
@@ -173,6 +174,22 @@ Enum for controlling blur quality vs performance:
 - `BlurQuality.low` - Faster rendering, lower quality
 - `BlurQuality.medium` - Balanced quality and performance
 - `BlurQuality.high` - Best quality, slower rendering
+
+## Kernel Size and Performance
+
+- If you are using a large `sigma`, you should also use a large `kernelSize` for a smooth and natural blur effect.
+- **However, keep in mind:**
+  - Larger kernel sizes require significantly more computational power and may slow down or even crash your app, especially on low-end devices.
+  - The recommended maximum kernel size is **35**. Values above this are possible but should be used with caution.
+- For most use cases, a kernel size between **15** and **35** provides a good balance between quality and performance.
+- Always test on your target devices to find the optimal value for your needs.
+
+## Recommended Sigma Values
+
+- For most use cases, a `sigma` value of **12** provides a good blur effect that is visually pleasing and performant.
+- The recommended range for `sigma` is **12** to **15**.
+- Higher sigma values will increase blur strength but also require a larger kernel size and more computational power.
+- Always test different sigma values to find the best balance for your app and device performance.
 
 ## Performance Tips
 
