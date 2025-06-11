@@ -73,6 +73,7 @@ Create a tilt-shift blur effect for depth-of-field photography:
 VariableBlur(
   sigma: 8.0,
   blurSides: BlurSides.vertical(top: 1.0, bottom: 1.0),
+  kernelSize: 20.0,
   quality: BlurQuality.high,
   child: Image.asset('assets/landscape.jpg'),
 )
@@ -140,22 +141,21 @@ BlurSides.horizontal(left: 0.5, right: 0.8)
 // Vertical blur only
 BlurSides.vertical(top: 1.0, bottom: 0.3)
 
-// Custom configuration for all sides
-BlurSides._(top: 0.2, bottom: 0.8, left: 0.0, right: 1.0)
-```
-
 ## API Reference
 
 ### VariableBlur
 
 The main widget for applying variable blur effects.
 
-| Parameter   | Type          | Default            | Description                                            |
-| ----------- | ------------- | ------------------ | ------------------------------------------------------ |
-| `child`     | `Widget`      | required           | The widget to apply blur effects to                    |
-| `sigma`     | `double`      | required           | The blur intensity (0.0 = no blur, higher = more blur) |
-| `blurSides` | `BlurSides`   | required           | Configuration for which sides to blur                  |
-| `quality`   | `BlurQuality` | `BlurQuality.high` | Quality setting for performance optimization           |
+| Parameter      | Type          | Default            | Description                                            |
+| -------------- | ------------- | ------------------ | ------------------------------------------------------ |
+| `child`        | `Widget`      | required           | The widget to apply blur effects to                    |
+| `sigma`        | `double`      | required           | The blur intensity (0.0 = no blur, higher = more blur) |
+| `blurSides`    | `BlurSides`   | required           | Configuration for which sides to blur                  |
+| `quality`      | `BlurQuality` | `BlurQuality.high` | Quality setting for performance optimization           |
+| `edgeIntensity`| `double`      | `0.15`             | Controls smoothness of blur transitions (0.0 to 1.0)  |
+| `kernelSize`   | `double`      | `15.0`             | Controls blur kernel size (5.0 to 50.0)               |
+| `isYFlipNeed`  | `bool`        | `false`            | Whether to flip Y-axis for Android compatibility       |
 
 ### BlurSides
 
@@ -165,7 +165,6 @@ Configuration class for controlling blur on different sides.
 
 - `BlurSides.horizontal({double left, double right})` - Apply blur horizontally
 - `BlurSides.vertical({double top, double bottom})` - Apply blur vertically
-- `BlurSides._({double top, double bottom, double left, double right})` - Custom configuration
 
 ### BlurQuality
 
@@ -179,8 +178,9 @@ Enum for controlling blur quality vs performance:
 
 1. **Use appropriate quality settings**: Lower quality settings for animations, higher for static effects
 2. **Limit blur sigma values**: Very high sigma values (>15) can impact performance
-3. **Consider widget tree placement**: Apply blur as close to the target widget as possible
-4. **Cache blur effects**: For static content, consider using RepaintBoundary
+3. **Optimize kernel size**: Lower kernel sizes (5-15) for better performance, higher (20-30) for smoother blur
+4. **Consider widget tree placement**: Apply blur as close to the target widget as possible
+5. **Cache blur effects**: For static content, consider using RepaintBoundary
 
 ## Examples
 

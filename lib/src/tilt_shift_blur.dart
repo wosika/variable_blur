@@ -39,6 +39,7 @@ import 'package:variable_blur/src/models/blur_side.dart';
 ///   sigma: 15.0,
 ///   blurSides: BlurSides.vertical(top: 1.0, bottom: 0.3),
 ///   edgeIntensity: 0.2,
+///   kernelSize: 20.0,
 ///   quality: BlurQuality.high,
 ///   child: Image.asset('assets/photo.jpg'),
 /// )
@@ -47,6 +48,7 @@ import 'package:variable_blur/src/models/blur_side.dart';
 /// ## Performance Considerations
 /// - Use [BlurQuality.low] or [BlurQuality.medium] for better performance on lower-end devices
 /// - Higher [sigma] values require more processing power
+/// - Higher [kernelSize] values create smoother blur but impact performance
 /// - The [edgeIntensity] affects the smoothness of blur transitions
 class VariableBlur extends StatelessWidget {
   /// Creates a [VariableBlur] widget.
@@ -57,6 +59,8 @@ class VariableBlur extends StatelessWidget {
   /// [blurSides] defines the blur intensity for different regions.
   /// [quality] controls the rendering quality vs performance trade-off.
   /// [edgeIntensity] controls the smoothness of blur transitions (0.0 to 1.0).
+  /// [kernelSize] controls the blur kernel size (higher = more blur samples).
+  ///
   /// [isYFlipNeed] should be set to true on Android devices that flip the Y-axis.
   const VariableBlur(
       {super.key,
@@ -65,6 +69,7 @@ class VariableBlur extends StatelessWidget {
       required this.blurSides,
       this.quality = BlurQuality.high, // Add quality control
       this.edgeIntensity = 0.15, // 15% of screen size for smooth transition
+      this.kernelSize = 15.0, // Default kernel size
       this.isYFlipNeed = false});
 
   /// The widget to apply the blur effect to.
@@ -79,8 +84,8 @@ class VariableBlur extends StatelessWidget {
   /// Defines the blur intensity for different regions of the widget.
   ///
   /// Use [BlurSides.vertical] for top-to-bottom blur transitions,
-  /// [BlurSides.horizontal] for left-to-right transitions, or create
-  /// custom combinations by specifying individual values.
+  /// [BlurSides.horizontal] for left-to-right transitions,
+  ///
   final BlurSides blurSides;
 
   /// Controls the rendering quality vs performance trade-off.
@@ -96,6 +101,14 @@ class VariableBlur extends StatelessWidget {
   /// blurred and non-blurred regions. Lower values create sharper transitions.
   /// Default is 0.15 (15% of the screen size).
   final double edgeIntensity;
+
+  /// Controls the blur kernel size (number of samples).
+  ///
+  /// Higher values create smoother blur effects but require more processing power.
+  /// Lower values are faster but may produce less smooth results.
+  /// Typical values range from 5.0 to 25.0.
+  /// Default is 15.0.
+  final double kernelSize;
 
   /// Whether to flip the Y-axis coordinate system.
   ///
@@ -132,7 +145,8 @@ class VariableBlur extends StatelessWidget {
             ..setFloat(5, blurSides.left)
             ..setFloat(6, blurSides.right)
             ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
-            ..setFloat(8, edgeIntensity);
+            ..setFloat(8, edgeIntensity)
+            ..setFloat(9, _getAdjustedKernelSize());
 
           verticalShader.setImageSampler(0, horizontalImage);
           verticalShader.setImageSampler(1, image); // Original for blending
@@ -156,12 +170,13 @@ class VariableBlur extends StatelessWidget {
     shader
       ..setFloat(0, size.width)
       ..setFloat(1, size.height)
-      ..setFloat(2, sigma) // Use original sigma, not adjusted
+      ..setFloat(2, _getAdjustedSigma()) // Use original sigma, not adjusted
       ..setFloat(3, blurSides.top)
       ..setFloat(4, blurSides.bottom)
       ..setFloat(5, blurSides.left)
       ..setFloat(6, blurSides.right)
-      ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0);
+      ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
+      ..setFloat(8, _getAdjustedKernelSize());
 
     shader.setImageSampler(0, image);
 
@@ -173,20 +188,32 @@ class VariableBlur extends StatelessWidget {
     return recorder.endRecording();
   }
 
-  // double _getAdjustedSigma() {
-  //   // For large sigma values, quality adjustment should be minimal
-  //   // to preserve the blur effect
-  //   switch (quality) {
-  //     case BlurQuality.low:
-  //       return sigma > 10
-  //           ? sigma * 0.8
-  //           : sigma * 0.5; // Less reduction for large sigma
-  //     case BlurQuality.medium:
-  //       return sigma > 10 ? sigma * 0.9 : sigma * 0.75;
-  //     case BlurQuality.high:
-  //       return sigma;
-  //   }
-  // }
+  double _getAdjustedSigma() {
+    // For large sigma values, quality adjustment should be minimal
+    // to preserve the blur effect
+    switch (quality) {
+      case BlurQuality.low:
+        return sigma > 10
+            ? sigma * 0.8
+            : sigma * 0.5; // Less reduction for large sigma
+      case BlurQuality.medium:
+        return sigma > 10 ? sigma * 0.9 : sigma * 0.75;
+      case BlurQuality.high:
+        return sigma;
+    }
+  }
+
+  double _getAdjustedKernelSize() {
+    // Adjust kernel size based on quality setting
+    switch (quality) {
+      case BlurQuality.low:
+        return (kernelSize * 0.6).clamp(3.0, 25.0);
+      case BlurQuality.medium:
+        return (kernelSize * 0.8).clamp(5.0, 50.0);
+      case BlurQuality.high:
+        return kernelSize;
+    }
+  }
 }
 
 /// Defines the rendering quality levels for blur effects.

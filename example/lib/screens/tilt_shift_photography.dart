@@ -12,6 +12,7 @@ class _TiltShiftPhotographyState extends State<TiltShiftPhotography> {
   double _blurIntensity = 8.0;
   double _topBlur = 0.3;
   double _bottomBlur = 0.3;
+  double _kernelSize = 15.0;
   int _selectedImageIndex = 0;
 
   final List<String> _sampleImages = [
@@ -54,6 +55,7 @@ class _TiltShiftPhotographyState extends State<TiltShiftPhotography> {
                   top: _topBlur,
                   bottom: _bottomBlur,
                 ),
+                // kernelSize: _kernelSize,
                 quality: BlurQuality.high,
                 child: Image.network(
                   _sampleImages[_selectedImageIndex],
@@ -167,6 +169,15 @@ class _TiltShiftPhotographyState extends State<TiltShiftPhotography> {
                   0.0,
                   1.0 - _topBlur,
                   (value) => setState(() => _bottomBlur = value),
+                ),
+
+                // Kernel Size
+                _buildSlider(
+                  'Kernel Size',
+                  _kernelSize,
+                  5.0,
+                  30.0,
+                  (value) => setState(() => _kernelSize = value),
                 ),
 
                 // Clear area indicator

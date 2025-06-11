@@ -11,6 +11,7 @@ uniform float leftExtent;
 uniform float rightExtent;
 uniform float isAndroid;
 uniform float edgeIntensity;
+uniform float kernelSize;
 uniform sampler2D uTexture;
 uniform sampler2D uOriginalTexture;
 
@@ -59,10 +60,10 @@ void main() {
     if (inLeft) edgeDistance = min(edgeDistance, leftEdge - fragCoord.x);
     if (inRight) edgeDistance = min(edgeDistance, fragCoord.x - rightEdge);
     
-    // Adaptive kernel size - removed the hard limit of 17
-    int kSize = int(ceil(3.0 * sigma));
-    // Cap at reasonable maximum for performance (can be increased if needed)
-    kSize = min(kSize, 50);
+    // Use provided kernel size instead of calculating from sigma
+    int kSize = int(kernelSize);
+    // Ensure minimum kernel size for blur effect
+    kSize = max(kSize, 1);
     
     vec3 result = vec3(0.0);
     float weightSum = 0.0;

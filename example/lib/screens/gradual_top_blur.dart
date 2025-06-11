@@ -26,7 +26,7 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
   }
 
   void _onScroll() {
-    const maxBlur = 12.0;
+    const maxBlur = 20;
     const scrollThreshold = 200.0;
 
     final offset = _scrollController.offset.clamp(1.0, scrollThreshold);
@@ -51,6 +51,8 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
       ),
       body: VariableBlur(
         sigma: _blurIntensity,
+        kernelSize: 70,
+
         blurSides: BlurSides.vertical(top: 0.3),
         child: Container(
           color: Colors.black,
