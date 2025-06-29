@@ -73,7 +73,6 @@ Create a tilt-shift blur effect for depth-of-field photography:
 VariableBlur(
   sigma: 8.0,
   blurSides: BlurSides.vertical(top: 1.0, bottom: 1.0),
-  kernelSize: 20.0,
   quality: BlurQuality.high,
   child: Image.asset('assets/landscape.jpg'),
 )
@@ -155,7 +154,6 @@ The main widget for applying variable blur effects.
 | `blurSides`    | `BlurSides`   | required           | Configuration for which sides to blur                  |
 | `quality`      | `BlurQuality` | `BlurQuality.high` | Quality setting for performance optimization           |
 | `edgeIntensity`| `double`      | `0.15`             | Controls smoothness of blur transitions (0.0 to 1.0)  |
-| `kernelSize`   | `double`      | `15.0`             | Controls blur kernel size (5.0 to 50.0)               |
 | `isYFlipNeed`  | `bool`        | `false`            | Whether to flip Y-axis for Android compatibility       |
 
 ### BlurSides
@@ -177,12 +175,14 @@ Enum for controlling blur quality vs performance:
 
 ## Kernel Size and Performance
 
-- If you are using a large `sigma`, you should also use a large `kernelSize` for a smooth and natural blur effect.
-- **However, keep in mind:**
-  - Larger kernel sizes require significantly more computational power and may slow down or even crash your app, especially on low-end devices.
-  - The recommended maximum kernel size is **35**. Values above this are possible but should be used with caution.
-- For most use cases, a kernel size between **15** and **35** provides a good balance between quality and performance.
-- Always test on your target devices to find the optimal value for your needs.
+- Kernel size is now automatically calculated based on your `sigma` value and `quality` setting.
+- **Higher sigma values automatically use larger kernel sizes** for smooth, natural blur effects.
+- **Quality settings control the kernel size multiplier:**
+  - **Low Quality**: Smaller kernels for better performance (good for animations)
+  - **Medium Quality**: Balanced kernels for most use cases
+  - **High Quality**: Full-size kernels for best visual quality
+- The system automatically caps kernel sizes at safe limits to prevent performance issues.
+- You no longer need to manually adjust kernel size - just focus on `sigma` and `quality`!
 
 ## Recommended Sigma Values
 
@@ -195,7 +195,7 @@ Enum for controlling blur quality vs performance:
 
 1. **Use appropriate quality settings**: Lower quality settings for animations, higher for static effects
 2. **Limit blur sigma values**: Very high sigma values (>15) can impact performance
-3. **Optimize kernel size**: Lower kernel sizes (5-15) for better performance, higher (20-30) for smoother blur
+3. **Choose optimal quality**: The quality setting automatically adjusts kernel size for best performance
 4. **Consider widget tree placement**: Apply blur as close to the target widget as possible
 5. **Cache blur effects**: For static content, consider using RepaintBoundary
 
@@ -223,3 +223,26 @@ Run the example app:
 cd example
 flutter run
 ```
+
+## Troubleshooting
+
+### Flickering with High Sigma Values
+
+If you experience flickering when using high sigma values (like `sigma: 20`), this is typically due to GPU resource allocation on the first frame. We've addressed this issue in the latest version by adding the `kernelSize` parameter.
+
+**Solution:**
+1. Update to the latest version (`^0.0.7`)
+2. The kernel size is now automatically calculated based on sigma and quality:
+```dart
+VariableBlur(
+  sigma: 20.0,           // High blur intensity
+  quality: BlurQuality.medium, // Automatically adjusts kernel size
+  blurSides: BlurSides.vertical(top: 0.5, bottom: 0.5),
+  child: yourWidget,
+)
+```
+
+**Quality Settings:**
+- **High Quality**: Full kernel size for best quality (may be slower)
+- **Medium Quality**: Balanced kernel size for good performance
+- **Low Quality**: Reduced kernel size for best performance

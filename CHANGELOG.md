@@ -1,19 +1,18 @@
 ## 0.0.7
 
 ### Added
-- Added `kernelSize` parameter to `VariableBlur` for fine-grained control over blur smoothness and performance.
-- Both horizontal and vertical shaders now accept a `kernelSize` uniform, allowing kernel size to be set from Flutter.
-- Example and documentation updated to demonstrate and explain the new `kernelSize` parameter.
-- Added performance tips and best practices for kernel size and sigma selection.
+- Automatic kernel size calculation based on sigma value and quality setting.
+- Simplified API - no more manual kernel size configuration needed!
 
 ### Changed
+- **REMOVED**: The `kernelSize` parameter has been removed to simplify the API.
+- **IMPROVED**: Quality settings now automatically optimize kernel size for best performance vs quality trade-off.
 - Cleaned up unused uniforms in shaders (removed `edgeIntensity` from horizontal pass).
-- Improved documentation for all parameters, including new usage examples and API table.
+- Updated all examples and documentation to reflect the simplified API.
 
 ### Fixed
 - Previously, using sigma values greater than 15 was not recommended and could result in poor blur or performance issues.
-- Now, with the new `kernelSize` parameter, you can safely use higher sigma values and adjust the blur quality and performance as needed.
-- Added `kernelSize` to `VariableBlur` for advanced control over blur smoothness.
+- Now, kernel size is automatically calculated, making high sigma values safer to use with appropriate quality settings.
 
 ## 0.0.6
 

@@ -39,7 +39,6 @@ import 'package:variable_blur/src/models/blur_side.dart';
 ///   sigma: 15.0,
 ///   blurSides: BlurSides.vertical(top: 1.0, bottom: 0.3),
 ///   edgeIntensity: 0.2,
-///   kernelSize: 20.0,
 ///   quality: BlurQuality.high,
 ///   child: Image.asset('assets/photo.jpg'),
 /// )
@@ -47,9 +46,9 @@ import 'package:variable_blur/src/models/blur_side.dart';
 ///
 /// ## Performance Considerations
 /// - Use [BlurQuality.low] or [BlurQuality.medium] for better performance on lower-end devices
-/// - Higher [sigma] values require more processing power
-/// - Higher [kernelSize] values create smoother blur but impact performance
+/// - Higher [sigma] values require more processing power and automatically use larger kernel sizes
 /// - The [edgeIntensity] affects the smoothness of blur transitions
+/// - Quality settings automatically adjust kernel size for optimal performance
 class VariableBlur extends StatelessWidget {
   /// Creates a [VariableBlur] widget.
   ///
@@ -59,8 +58,6 @@ class VariableBlur extends StatelessWidget {
   /// [blurSides] defines the blur intensity for different regions.
   /// [quality] controls the rendering quality vs performance trade-off.
   /// [edgeIntensity] controls the smoothness of blur transitions (0.0 to 1.0).
-  /// [kernelSize] controls the blur kernel size (higher = more blur samples).
-  ///
   /// [isYFlipNeed] should be set to true on Android devices that flip the Y-axis.
   const VariableBlur(
       {super.key,
@@ -69,7 +66,6 @@ class VariableBlur extends StatelessWidget {
       required this.blurSides,
       this.quality = BlurQuality.high, // Add quality control
       this.edgeIntensity = 0.15, // 15% of screen size for smooth transition
-      this.kernelSize = 25, // Default kernel size
       this.isYFlipNeed = false});
 
   /// The widget to apply the blur effect to.
@@ -101,14 +97,6 @@ class VariableBlur extends StatelessWidget {
   /// blurred and non-blurred regions. Lower values create sharper transitions.
   /// Default is 0.15 (15% of the screen size).
   final double edgeIntensity;
-
-  /// Controls the blur kernel size (number of samples).
-  ///
-  /// Higher values create smoother blur effects but require more processing power.
-  /// Lower values are faster but may produce less smooth results.
-  /// Typical values range from 5.0 to 25.0.
-  /// Default is 15.0.
-  final double kernelSize;
 
   /// Whether to flip the Y-axis coordinate system.
   ///
@@ -204,14 +192,20 @@ class VariableBlur extends StatelessWidget {
   }
 
   double _getAdjustedKernelSize() {
-    // Adjust kernel size based on quality setting
+    // Calculate kernel size based on sigma and quality setting
+    // Base formula: kernel_radius = ceil(3.0 * sigma), kernel_size = 2 * radius + 1
+    double baseKernelSize = 2.0 * (3.0 * _getAdjustedSigma()).ceil() + 1.0;
+
     switch (quality) {
       case BlurQuality.low:
-        return (kernelSize * 0.6).clamp(3.0, 25.0);
+        // Reduce kernel size for performance, but ensure minimum quality
+        return (baseKernelSize * 0.6).clamp(5.0, 25.0);
       case BlurQuality.medium:
-        return (kernelSize * 0.8).clamp(5.0, 50.0);
+        // Moderate kernel size for balanced performance
+        return (baseKernelSize * 0.8).clamp(7.0, 35.0);
       case BlurQuality.high:
-        return kernelSize;
+        // Full kernel size for best quality, but cap for safety
+        return baseKernelSize.clamp(9.0, 100.0);
     }
   }
 }

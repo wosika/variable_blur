@@ -25,7 +25,6 @@
 /// VariableBlur(
 ///   sigma: 10.0,
 ///   blurSides: BlurSides.vertical(top: 1.0, bottom: 0.5),
-///   kernelSize: 18.0,
 ///   edgeIntensity: 0.2,
 ///   quality: BlurQuality.high,
 ///   child: Image.asset('path/to/image.jpg'),

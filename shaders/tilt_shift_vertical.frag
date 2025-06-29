@@ -60,11 +60,11 @@ void main() {
     if (inLeft) edgeDistance = min(edgeDistance, leftEdge - fragCoord.x);
     if (inRight) edgeDistance = min(edgeDistance, fragCoord.x - rightEdge);
     
-    // Use provided kernel size instead of calculating from sigma
+    // Use kernel size provided from Dart side
     int kSize = int(kernelSize);
     // Ensure minimum kernel size for blur effect
     kSize = max(kSize, 1);
-    
+
     vec3 result = vec3(0.0);
     float weightSum = 0.0;
     
