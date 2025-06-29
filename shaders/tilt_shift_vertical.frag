@@ -35,6 +35,12 @@ void main() {
     vec4 originalColor = texture(uOriginalTexture, uv);
     vec4 horizontalBlurred = texture(uTexture, uv);
     
+    // Early return if sigma is 0 - no blur needed
+    if (sigma <= 0.0) {
+        FragColor = originalColor;
+        return;
+    }
+    
     // Calculate edge positions
     float topEdge = topExtent * uViewSize.y;
     float bottomEdge = (1.0 - bottomExtent) * uViewSize.y;

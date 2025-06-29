@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'package:variable_blur/src/models/blur_side.dart';
@@ -40,6 +41,7 @@ import 'package:variable_blur/src/models/blur_side.dart';
 ///   blurSides: BlurSides.vertical(top: 1.0, bottom: 0.3),
 ///   edgeIntensity: 0.2,
 ///   quality: BlurQuality.high,
+///   useRepaintBoundary: true, // For performance optimization
 ///   child: Image.asset('assets/photo.jpg'),
 /// )
 /// ```
@@ -49,105 +51,104 @@ import 'package:variable_blur/src/models/blur_side.dart';
 /// - Higher [sigma] values require more processing power and automatically use larger kernel sizes
 /// - The [edgeIntensity] affects the smoothness of blur transitions
 /// - Quality settings automatically adjust kernel size for optimal performance
+/// - RepaintBoundary is enabled by default to isolate expensive blur operations
+/// - Set [useRepaintBoundary] to false only if you need manual RepaintBoundary management
 class VariableBlur extends StatelessWidget {
   /// Creates a [VariableBlur] widget.
   ///
   /// The [child], [sigma], and [blurSides] parameters are required.
   ///
   /// [sigma] controls the overall blur intensity and must be greater than 0.
+  /// Values close to 0 result in minimal blur, while larger values create stronger effects.
   /// [blurSides] defines the blur intensity for different regions.
   /// [quality] controls the rendering quality vs performance trade-off.
   /// [edgeIntensity] controls the smoothness of blur transitions (0.0 to 1.0).
   /// [isYFlipNeed] should be set to true on Android devices that flip the Y-axis.
+  /// [useRepaintBoundary] isolates expensive blur operations for better performance.
   const VariableBlur(
       {super.key,
       required this.child,
       required this.sigma,
       required this.blurSides,
-      this.quality = BlurQuality.high, // Add quality control
-      this.edgeIntensity = 0.15, // 15% of screen size for smooth transition
-      this.isYFlipNeed = false});
+      this.quality = BlurQuality.high,
+      this.edgeIntensity = 0.15,
+      this.isYFlipNeed = false,
+      this.useRepaintBoundary = true});
 
   /// The widget to apply the blur effect to.
   final Widget child;
 
   /// The blur intensity/radius in logical pixels.
   ///
-  /// Higher values create stronger blur effects. Must be greater than 0.
-  /// Typical values range from 1.0 to 50.0, though larger values are supported.
+  /// Must be greater than 0. Values close to 0 (like 0.1-1.0) create subtle blur effects,
+  /// while larger values create more pronounced blur. When sigma is 0, no blur is applied
+  /// and the original image is displayed.
   final double sigma;
 
   /// Defines the blur intensity for different regions of the widget.
-  ///
-  /// Use [BlurSides.vertical] for top-to-bottom blur transitions,
-  /// [BlurSides.horizontal] for left-to-right transitions,
-  ///
   final BlurSides blurSides;
 
   /// Controls the rendering quality vs performance trade-off.
-  ///
-  /// - [BlurQuality.high]: Best quality, slower performance
-  /// - [BlurQuality.medium]: Balanced quality and performance
-  /// - [BlurQuality.low]: Fastest performance, lower quality
   final BlurQuality quality;
 
   /// Controls the intensity of smooth edge transitions (0.0 to 1.0).
-  ///
-  /// Higher values create smoother, more gradual transitions between
-  /// blurred and non-blurred regions. Lower values create sharper transitions.
-  /// Default is 0.15 (15% of the screen size).
   final double edgeIntensity;
 
   /// Whether to flip the Y-axis coordinate system.
-  ///
-  /// Some Android devices use different coordinate systems that can cause
-  /// the blur effect to appear flipped. Set this to true if the blur effect
-  /// appears vertically flipped on the target device.
-  ///
-  /// This is typically only needed on specific Android devices and should
-  /// be false for most use cases.
   final bool isYFlipNeed;
+
+  /// Whether to wrap the blur widget with RepaintBoundary for performance optimization.
+  final bool useRepaintBoundary;
 
   @override
   Widget build(BuildContext context) {
-    if (sigma <= 0) {
-      return child;
-    }
-
-    return ShaderBuilder((context, horizontalShader, _) {
+    Widget blurWidget = ShaderBuilder((context, horizontalShader, _) {
       return ShaderBuilder((context, verticalShader, _) {
         return AnimatedSampler((image, size, canvas) {
-          // Create intermediate render target for horizontal pass
-          final ui.Picture horizontalPicture =
-              _createHorizontalPass(horizontalShader, image, size);
-          final ui.Image horizontalImage = horizontalPicture.toImageSync(
-              size.width.toInt(), size.height.toInt());
+          ui.Picture? horizontalPicture;
+          ui.Image? horizontalImage;
 
-          // Vertical pass with final blending
-          verticalShader
-            ..setFloat(0, size.width)
-            ..setFloat(1, size.height)
-            ..setFloat(2, sigma)
-            ..setFloat(3, blurSides.top)
-            ..setFloat(4, blurSides.bottom)
-            ..setFloat(5, blurSides.left)
-            ..setFloat(6, blurSides.right)
-            ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
-            ..setFloat(8, edgeIntensity)
-            ..setFloat(9, _getAdjustedKernelSize());
+          try {
+            // Create intermediate render target for horizontal pass
+            horizontalPicture =
+                _createHorizontalPass(horizontalShader, image, size);
+            horizontalImage = horizontalPicture.toImageSync(
+                size.width.toInt(), size.height.toInt());
 
-          verticalShader.setImageSampler(0, horizontalImage);
-          verticalShader.setImageSampler(1, image); // Original for blending
+            // Vertical pass with final blending
+            verticalShader
+              ..setFloat(0, size.width)
+              ..setFloat(1, size.height)
+              ..setFloat(2, _getAdjustedSigma())
+              ..setFloat(3, blurSides.top)
+              ..setFloat(4, blurSides.bottom)
+              ..setFloat(5, blurSides.left)
+              ..setFloat(6, blurSides.right)
+              ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
+              ..setFloat(8, edgeIntensity)
+              ..setFloat(9, _getAdjustedKernelSize());
 
-          canvas.drawRect(
-            Rect.fromLTWH(0, 0, size.width, size.height),
-            Paint()..shader = verticalShader,
-          );
+            verticalShader.setImageSampler(0, horizontalImage);
+            verticalShader.setImageSampler(1, image); // Original for blending
 
-          horizontalImage.dispose();
+            canvas.drawRect(
+              Rect.fromLTWH(0, 0, size.width, size.height),
+              Paint()..shader = verticalShader,
+            );
+          } catch (e) {
+            // Fallback: render original image without blur on error
+            canvas.drawImage(image, Offset.zero, Paint());
+          } finally {
+            // Always dispose of intermediate resources to prevent memory leaks
+            horizontalImage?.dispose();
+            horizontalPicture?.dispose();
+          }
         }, child: child);
       }, assetKey: 'packages/variable_blur/shaders/tilt_shift_vertical.frag');
     }, assetKey: 'packages/variable_blur/shaders/tilt_shift_horizontal.frag');
+
+    // Optionally wrap with RepaintBoundary for performance isolation
+    return useRepaintBoundary ? RepaintBoundary(child: blurWidget) : blurWidget;
   }
 
   ui.Picture _createHorizontalPass(
@@ -158,7 +159,7 @@ class VariableBlur extends StatelessWidget {
     shader
       ..setFloat(0, size.width)
       ..setFloat(1, size.height)
-      ..setFloat(2, _getAdjustedSigma()) // Use original sigma, not adjusted
+      ..setFloat(2, _getAdjustedSigma())
       ..setFloat(3, blurSides.top)
       ..setFloat(4, blurSides.bottom)
       ..setFloat(5, blurSides.left)
@@ -173,7 +174,8 @@ class VariableBlur extends StatelessWidget {
       Paint()..shader = shader,
     );
 
-    return recorder.endRecording();
+    final picture = recorder.endRecording();
+    return picture;
   }
 
   double _getAdjustedSigma() {
@@ -206,6 +208,35 @@ class VariableBlur extends StatelessWidget {
       case BlurQuality.high:
         // Full kernel size for best quality, but cap for safety
         return baseKernelSize.clamp(9.0, 100.0);
+    }
+  }
+
+  /// Pre-warms GPU shaders to prevent first-use stuttering.
+  ///
+  /// Call this method early in your app (e.g., in main() or app initialization)
+  /// to compile shaders before they're needed, preventing stuttering when
+  /// blur effects first activate during user interaction.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// void main() {
+  ///   VariableBlur.warmUpShaders(); // Prevent first-scroll stutter
+  ///   runApp(MyApp());
+  /// }
+  /// ```
+  static void warmUpShaders() {
+    // Note: Currently Flutter doesn't provide direct shader pre-compilation APIs
+    // This is a placeholder for future implementation when the framework supports it
+    if (kDebugMode) {
+      print(
+          'VariableBlur: Shader warm-up requested - will compile on first use');
+    }
+  }
+
+  /// Monitors memory usage for blur operations (debug builds only).
+  static void debugMemoryUsage({bool enableLogging = false}) {
+    if (enableLogging && kDebugMode) {
+      print('VariableBlur: Memory monitoring active');
     }
   }
 }

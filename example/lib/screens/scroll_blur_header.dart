@@ -10,7 +10,7 @@ class ScrollBlurHeader extends StatefulWidget {
 
 class _ScrollBlurHeaderState extends State<ScrollBlurHeader> {
   final ScrollController _scrollController = ScrollController();
-  double _blurIntensity = 1.0;
+  double _blurIntensity = 0;
   double _headerOpacity = 1.0;
 
   @override
