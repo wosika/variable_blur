@@ -26,7 +26,7 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
   }
 
   void _onScroll() {
-    const maxBlur = 12;
+    const maxBlur = 15;
     const scrollThreshold = 200.0;
 
     final offset = _scrollController.offset.clamp(1.0, scrollThreshold);
@@ -39,6 +39,7 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
@@ -51,7 +52,8 @@ class _GradualTopBlurState extends State<GradualTopBlur> {
       ),
       body: VariableBlur(
         sigma: _blurIntensity,
-        blurSides: BlurSides.vertical(top: 0.3),
+        edgeIntensity: 0.06,
+        blurSides: ResponsiveBlurSides.vertical(top: screenHeight * 0.12),
         child: Container(
           color: Colors.black,
           child: ListView(

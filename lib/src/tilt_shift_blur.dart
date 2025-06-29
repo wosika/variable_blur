@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'package:variable_blur/src/models/blur_side.dart';
+import 'package:variable_blur/src/models/blur_side_base.dart';
 
 /// A widget that applies variable blur effects to its child widget.
 ///
@@ -36,12 +37,22 @@ import 'package:variable_blur/src/models/blur_side.dart';
 /// ## Example Usage
 ///
 /// ```dart
+/// // Using normalized blur values (0.0 to 1.0)
 /// VariableBlur(
 ///   sigma: 15.0,
 ///   blurSides: BlurSides.vertical(top: 1.0, bottom: 0.3),
 ///   edgeIntensity: 0.2,
 ///   quality: BlurQuality.high,
 ///   useRepaintBoundary: true, // For performance optimization
+///   child: Image.asset('assets/photo.jpg'),
+/// )
+///
+/// // Using pixel-based blur values with ResponsiveBlurSides
+/// VariableBlur(
+///   sigma: 15.0,
+///   blurSides: ResponsiveBlurSides(top: 100.0, bottom: 50.0), // pixels
+///   edgeIntensity: 0.2,
+///   quality: BlurQuality.high,
 ///   child: Image.asset('assets/photo.jpg'),
 /// )
 /// ```
@@ -60,7 +71,8 @@ class VariableBlur extends StatelessWidget {
   ///
   /// [sigma] controls the overall blur intensity and must be greater than 0.
   /// Values close to 0 result in minimal blur, while larger values create stronger effects.
-  /// [blurSides] defines the blur intensity for different regions.
+  /// [blurSides] defines the blur intensity for different regions. Use [BlurSides] for normalized
+  /// values (0.0-1.0) or [ResponsiveBlurSides] for pixel-based values that auto-scale to widget size.
   /// [quality] controls the rendering quality vs performance trade-off.
   /// [edgeIntensity] controls the smoothness of blur transitions (0.0 to 1.0).
   /// [isYFlipNeed] should be set to true on Android devices that flip the Y-axis.
@@ -86,7 +98,7 @@ class VariableBlur extends StatelessWidget {
   final double sigma;
 
   /// Defines the blur intensity for different regions of the widget.
-  final BlurSides blurSides;
+  final BlurSidesBase blurSides;
 
   /// Controls the rendering quality vs performance trade-off.
   final BlurQuality quality;
@@ -109,9 +121,12 @@ class VariableBlur extends StatelessWidget {
           ui.Image? horizontalImage;
 
           try {
+            // Calculate normalized blur sides based on size for ResponsiveBlurSides
+            final normalizedBlurSides = _calculateNormalizedBlurSides(size);
+
             // Create intermediate render target for horizontal pass
-            horizontalPicture =
-                _createHorizontalPass(horizontalShader, image, size);
+            horizontalPicture = _createHorizontalPass(
+                horizontalShader, image, size, normalizedBlurSides);
             horizontalImage = horizontalPicture.toImageSync(
                 size.width.toInt(), size.height.toInt());
 
@@ -120,10 +135,10 @@ class VariableBlur extends StatelessWidget {
               ..setFloat(0, size.width)
               ..setFloat(1, size.height)
               ..setFloat(2, _getAdjustedSigma())
-              ..setFloat(3, blurSides.top)
-              ..setFloat(4, blurSides.bottom)
-              ..setFloat(5, blurSides.left)
-              ..setFloat(6, blurSides.right)
+              ..setFloat(3, normalizedBlurSides.top)
+              ..setFloat(4, normalizedBlurSides.bottom)
+              ..setFloat(5, normalizedBlurSides.left)
+              ..setFloat(6, normalizedBlurSides.right)
               ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
               ..setFloat(8, edgeIntensity)
               ..setFloat(9, _getAdjustedKernelSize());
@@ -151,8 +166,8 @@ class VariableBlur extends StatelessWidget {
     return useRepaintBoundary ? RepaintBoundary(child: blurWidget) : blurWidget;
   }
 
-  ui.Picture _createHorizontalPass(
-      ui.FragmentShader shader, ui.Image image, Size size) {
+  ui.Picture _createHorizontalPass(ui.FragmentShader shader, ui.Image image,
+      Size size, BlurSidesBase normalizedBlurSides) {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
@@ -160,10 +175,10 @@ class VariableBlur extends StatelessWidget {
       ..setFloat(0, size.width)
       ..setFloat(1, size.height)
       ..setFloat(2, _getAdjustedSigma())
-      ..setFloat(3, blurSides.top)
-      ..setFloat(4, blurSides.bottom)
-      ..setFloat(5, blurSides.left)
-      ..setFloat(6, blurSides.right)
+      ..setFloat(3, normalizedBlurSides.top)
+      ..setFloat(4, normalizedBlurSides.bottom)
+      ..setFloat(5, normalizedBlurSides.left)
+      ..setFloat(6, normalizedBlurSides.right)
       ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
       ..setFloat(8, _getAdjustedKernelSize());
 
@@ -238,6 +253,20 @@ class VariableBlur extends StatelessWidget {
     if (enableLogging && kDebugMode) {
       print('VariableBlur: Memory monitoring active');
     }
+  }
+
+  /// Calculates normalized blur values based on widget size for ResponsiveBlurSides
+  BlurSidesBase _calculateNormalizedBlurSides(Size size) {
+    if (blurSides is ResponsiveBlurSides) {
+      final responsive = blurSides as ResponsiveBlurSides;
+      return BlurSidesBase(
+        top: responsive.top / size.height,
+        bottom: responsive.bottom / size.height,
+        left: responsive.left / size.width,
+        right: responsive.right / size.width,
+      );
+    }
+    return blurSides;
   }
 }
 

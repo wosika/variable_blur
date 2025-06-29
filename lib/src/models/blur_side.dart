@@ -1,65 +1,63 @@
-/// Defines the blur intensity for different sides/regions of a widget.
+import 'package:variable_blur/src/models/blur_side_base.dart';
+
+/// Defines blur intensities for each side of a widget as a ratio of the child's size.
 ///
-/// The [BlurSides] class allows you to specify different blur intensities
-/// for the top, bottom, left, and right regions of a widget. Values range
-/// from 0.0 (no blur) to 1.0 (maximum blur).
+/// The [BlurSides] class is used when you want to specify the blur region as a fraction
+/// of the child's width or height. For example, a value of 0.1 means 10% of the child's
+/// corresponding dimension. All values must be between 0.0 and 1.0.
 ///
-/// ## Example Usage
+/// Example:
+///   BlurSides.vertical(top: 0.1, bottom: 0.2) // 10% from top, 20% from bottom
+///   BlurSides.horizontal(left: 0.3, right: 0.0) // 30% from left, 0% from right
+class BlurSides extends BlurSidesBase {
+  /// Creates a horizontal blur effect with left and right as ratios (0.0 to 1.0) of the child's width.
+  const BlurSides.horizontal({super.left, super.right})
+      : assert(left >= 0.0 && left <= 1.0,
+            'Left blur value must be between 0.0 and 1.0, got $left'),
+        assert(right >= 0.0 && right <= 1.0,
+            'Right blur value must be between 0.0 and 1.0, got $right');
+
+  /// Creates a vertical blur effect with top and bottom as ratios (0.0 to 1.0) of the child's height.
+  const BlurSides.vertical({super.top, super.bottom})
+      : assert(top >= 0.0 && top <= 1.0,
+            'Top blur value must be between 0.0 and 1.0, got $top'),
+        assert(bottom >= 0.0 && bottom <= 1.0,
+            'Bottom blur value must be between 0.0 and 1.0, got $bottom');
+}
+
+/// Defines blur intensities for each side of a widget in absolute pixels.
 ///
-/// ```dart
-/// // Create vertical blur effect
-/// final verticalBlur = BlurSides.vertical(top: 1.0, bottom: 0.3);
+/// The [ResponsiveBlurSides] class is used when you want to specify the blur region
+/// in pixels, regardless of the child's size. This is useful for fixed blur distances.
 ///
-/// // Create horizontal blur effect
-/// final horizontalBlur = BlurSides.horizontal(left: 0.8, right: 0.2);
-/// ```
-class BlurSides {
-  /// The blur intensity for the top region (0.0 to 1.0).
-  final double top;
+/// Example:
+///   ResponsiveBlurSides.vertical(top: 20.0, bottom: 40.0) // 20px from top, 40px from bottom
+///   ResponsiveBlurSides.horizontal(left: 10.0, right: 0.0) // 10px from left, 0px from right
+class ResponsiveBlurSides extends BlurSidesBase {
+  /// Internal constructor for pixel-based blur sides.
+  const ResponsiveBlurSides._({
+    super.top,
+    super.bottom,
+    super.left,
+    super.right,
+  })  : assert(
+            top >= 0.0, 'Top blur pixel value must be non-negative, got $top'),
+        assert(bottom >= 0.0,
+            'Bottom blur pixel value must be non-negative, got $bottom'),
+        assert(left >= 0.0,
+            'Left blur pixel value must be non-negative, got $left'),
+        assert(right >= 0.0,
+            'Right blur pixel value must be non-negative, got $right');
 
-  /// The blur intensity for the bottom region (0.0 to 1.0).
-  final double bottom;
+  /// Creates a vertical blur effect with top and bottom in pixels.
+  const ResponsiveBlurSides.vertical({
+    double top = 0.0,
+    double bottom = 0.0,
+  }) : this._(top: top, bottom: bottom);
 
-  /// The blur intensity for the left region (0.0 to 1.0).
-  final double left;
-
-  /// The blur intensity for the right region (0.0 to 1.0).
-  final double right;
-
-  const BlurSides._({
-    this.top = 0.0,
-    this.bottom = 0.0,
-    this.left = 0.0,
-    this.right = 0.0,
-  });
-
-  /// Creates a horizontal blur effect with specified left and right intensities.
-  ///
-  /// This constructor is useful for creating blur effects that transition
-  /// from left to right or vice versa.
-  ///
-  /// Example:
-  /// ```dart
-  /// final blur = BlurSides.horizontal(left: 1.0, right: 0.0);
-  /// ```
-  ///
-  /// [left] - The blur intensity for the left region (default: 0.0)
-  /// [right] - The blur intensity for the right region (default: 0.0)
-  const BlurSides.horizontal({double left = 0.0, double right = 0.0})
-      : this._(left: left, right: right);
-
-  /// Creates a vertical blur effect with specified top and bottom intensities.
-  ///
-  /// This constructor is perfect for creating tilt-shift photography effects
-  /// or focus transitions from top to bottom.
-  ///
-  /// Example:
-  /// ```dart
-  /// final blur = BlurSides.vertical(top: 0.8, bottom: 0.2);
-  /// ```
-  ///
-  /// [top] - The blur intensity for the top region (default: 0.0)
-  /// [bottom] - The blur intensity for the bottom region (default: 0.0)
-  const BlurSides.vertical({double top = 0.0, double bottom = 0.0})
-      : this._(top: top, bottom: bottom);
+  /// Creates a horizontal blur effect with left and right in pixels.
+  const ResponsiveBlurSides.horizontal({
+    double left = 0.0,
+    double right = 0.0,
+  }) : this._(left: left, right: right);
 }
