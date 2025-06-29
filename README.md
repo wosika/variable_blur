@@ -18,7 +18,6 @@ A Flutter package that provides customizable blur effects including tilt-shift b
 - **Tilt-Shift Blur**: Create professional depth-of-field effects similar to tilt-shift photography
 - **Customizable Blur Sides**: Control blur intensity independently on top, bottom, left, and right sides
 - **Performance Optimized**: Uses GPU shaders for smooth, high-performance blur rendering
-- **Color Tinting**: Add custom color tints to blur effects
 - **Quality Control**: Adjustable quality settings for performance optimization
 
 ## Getting started
