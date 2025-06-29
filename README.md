@@ -27,7 +27,7 @@ Add this package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  variable_blur: ^0.0.1
+  variable_blur: ^0.0.8
 ```
 
 Then run:
@@ -134,11 +134,35 @@ class _ScrollBlurExampleState extends State<ScrollBlurExample> {
 Control blur intensity on different sides:
 
 ```dart
-// Horizontal blur only
+// Horizontal blur only (ratio-based: 0.0 to 1.0)
 BlurSides.horizontal(left: 0.5, right: 0.8)
 
-// Vertical blur only
+// Vertical blur only (ratio-based: 0.0 to 1.0)
 BlurSides.vertical(top: 1.0, bottom: 0.3)
+
+// Pixel-based blur (absolute values in pixels)
+ResponsiveBlurSides.horizontal(left: 20.0, right: 40.0)
+ResponsiveBlurSides.vertical(top: 50.0, bottom: 30.0)
+```
+
+### BlurSides vs ResponsiveBlurSides
+
+**BlurSides** - Use when you want blur regions as a ratio of the child's size:
+- Values range from 0.0 to 1.0 (e.g., 0.1 = 10% of child's width/height)
+- Automatically adapts to different widget sizes
+- Perfect for responsive layouts
+
+**ResponsiveBlurSides** - Use when you want blur regions in absolute pixels:
+- Values are in pixels (e.g., 50.0 = 50 pixels)
+- Fixed blur distances regardless of widget size
+- Ideal for consistent visual effects
+
+```dart
+// Ratio-based: 20% of child's height from top
+BlurSides.vertical(top: 0.2, bottom: 0.0)
+
+// Pixel-based: exactly 50 pixels from top
+ResponsiveBlurSides.vertical(top: 50.0, bottom: 0.0)
 ```
 
 ## API Reference
@@ -231,7 +255,7 @@ flutter run
 If you experience flickering when using high sigma values (like `sigma: 20`), this is typically due to GPU resource allocation on the first frame. We've addressed this issue in the latest version by adding the `kernelSize` parameter.
 
 **Solution:**
-1. Update to the latest version (`^0.0.7`)
+1. Update to the latest version (`^0.0.8`)
 2. The kernel size is now automatically calculated based on sigma and quality:
 ```dart
 VariableBlur(

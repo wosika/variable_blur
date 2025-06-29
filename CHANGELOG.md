@@ -1,3 +1,19 @@
+## 0.0.8
+
+### Added
+- Comprehensive documentation for `BlurSides` (ratio-based, 0–1) and `ResponsiveBlurSides` (pixel-based) for clarity and ease of use.
+- Improved API docs and inline comments for all public classes and methods.
+
+### Changed
+- Major performance boost: rendering and blur computation are now significantly faster and more responsive, especially on large images and during dynamic updates.
+- Responsiveness improvements: blur effects now adapt more smoothly to widget size and pixel-based configurations.
+- Cleaned up and refactored code for maintainability and efficiency.
+- Updated all examples and documentation to reflect new best practices and usage patterns.
+
+### Fixed
+- Improved handling of edge cases for both ratio-based and pixel-based blur regions.
+- Enhanced compatibility and stability across iOS and Android devices.
+
 ## 0.0.7
 
 ### Added
