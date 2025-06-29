@@ -1,5 +1,4 @@
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'package:variable_blur/src/models/blur_side.dart';
@@ -223,35 +222,6 @@ class VariableBlur extends StatelessWidget {
       case BlurQuality.high:
         // Full kernel size for best quality, but cap for safety
         return baseKernelSize.clamp(9.0, 100.0);
-    }
-  }
-
-  /// Pre-warms GPU shaders to prevent first-use stuttering.
-  ///
-  /// Call this method early in your app (e.g., in main() or app initialization)
-  /// to compile shaders before they're needed, preventing stuttering when
-  /// blur effects first activate during user interaction.
-  ///
-  /// Example usage:
-  /// ```dart
-  /// void main() {
-  ///   VariableBlur.warmUpShaders(); // Prevent first-scroll stutter
-  ///   runApp(MyApp());
-  /// }
-  /// ```
-  static void warmUpShaders() {
-    // Note: Currently Flutter doesn't provide direct shader pre-compilation APIs
-    // This is a placeholder for future implementation when the framework supports it
-    if (kDebugMode) {
-      print(
-          'VariableBlur: Shader warm-up requested - will compile on first use');
-    }
-  }
-
-  /// Monitors memory usage for blur operations (debug builds only).
-  static void debugMemoryUsage({bool enableLogging = false}) {
-    if (enableLogging && kDebugMode) {
-      print('VariableBlur: Memory monitoring active');
     }
   }
 
