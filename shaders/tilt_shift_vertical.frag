@@ -73,8 +73,8 @@ void main() {
     float weightSum = 0.0;
     
     // Vertical blur pass with fixed loop bounds
-    // Use a reasonable maximum kernel size to avoid performance issues
-    const int MAX_KERNEL_SIZE = 32;
+    // Use 100 to match the exact maximum from Dart code (baseKernelSize.clamp(9.0, 100.0))
+    const int MAX_KERNEL_SIZE = 100;
     for (int j = -MAX_KERNEL_SIZE; j <= MAX_KERNEL_SIZE; ++j) {
         // Skip iterations outside the actual kernel size using logical comparison
         if (j < -kSize || j > kSize) continue;
