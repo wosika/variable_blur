@@ -16,9 +16,8 @@ uniform sampler2D uTexture;
 out vec4 FragColor;
 
 // Optimized Gaussian weight calculation
-float getGaussianWeight(int offset, float sig) {
-    float x = float(offset);
-    return exp(-0.5 * x * x / (sig * sig));
+float getGaussianWeight(float offset, float sig) {
+    return exp(-0.5 * offset * offset / (sig * sig));
 }
 
 void main() {
@@ -56,19 +55,23 @@ void main() {
         return;
     }
     
-    // Use kernel size provided from Dart side
-    int kSize = int(kernelSize);
-    // Ensure minimum kernel size for blur effect
-    kSize = max(kSize, 1);
+    // Use kernel size provided from Dart side, ensure minimum value using float max
+    float kSizeFloat = max(kernelSize, 1.0);
+    int kSize = int(kSizeFloat);
 
     vec3 result = vec3(0.0);
     float weightSum = 0.0;
     
-    // Horizontal blur pass
-    for (int i = -kSize; i <= kSize; ++i) {
+    // Horizontal blur pass with fixed loop bounds
+    // Use a reasonable maximum kernel size to avoid performance issues
+    const int MAX_KERNEL_SIZE = 32;
+    for (int i = -MAX_KERNEL_SIZE; i <= MAX_KERNEL_SIZE; ++i) {
+        // Skip iterations outside the actual kernel size using logical comparison
+        if (i < -kSize || i > kSize) continue;
+        
         vec2 offset = vec2(float(i) / uViewSize.x, 0.0);
         vec2 sampleUV = uv + offset;
-        float weight = getGaussianWeight(i, sigma);
+        float weight = getGaussianWeight(float(i), sigma);
         result += texture(uTexture, sampleUV).rgb * weight;
         weightSum += weight;
     }
