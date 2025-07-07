@@ -12,6 +12,10 @@ uniform float rightExtent;
 uniform float isAndroid;
 uniform float edgeIntensity;
 uniform float kernelSize;
+uniform float tintR;
+uniform float tintG;
+uniform float tintB;
+uniform float tintA;
 uniform sampler2D uTexture;
 uniform sampler2D uOriginalTexture;
 
@@ -36,7 +40,14 @@ void main() {
     
     // Early return if sigma is 0 - no blur needed
     if (sigma <= 0.0) {
-        FragColor = originalColor;
+        // Apply tint color even without blur if tint alpha > 0
+        if (tintA > 0.0) {
+            vec3 tintColor = vec3(tintR, tintG, tintB);
+            vec3 blended = mix(originalColor.rgb, tintColor, tintA);
+            FragColor = vec4(blended, originalColor.a);
+        } else {
+            FragColor = originalColor;
+        }
         return;
     }
     
@@ -88,12 +99,18 @@ void main() {
     
     vec3 blurred = result / weightSum;
     
+    // Apply tint color to blurred result
+    if (tintA > 0.0) {
+        vec3 tintColor = vec3(tintR, tintG, tintB);
+        blurred = mix(blurred, tintColor, tintA);
+    }
+    
     // Smooth edge transition
     float maxDimension = max(uViewSize.x, uViewSize.y);
     float transitionWidth = maxDimension * edgeIntensity;
     float blendFactor = smoothstep(0.0, 1.0, edgeDistance / transitionWidth);
     
-    // Final blending
-    vec4 blurredColor = vec4(blurred, 1.0);
+    // Final blending between original and tinted blurred result
+    vec4 blurredColor = vec4(blurred, originalColor.a);
     FragColor = mix(originalColor, blurredColor, blendFactor);
 }

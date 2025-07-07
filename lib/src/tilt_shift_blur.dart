@@ -11,7 +11,8 @@ import 'package:variable_blur/src/models/blur_side_base.dart';
 /// tilt-shift photography effects, focus transitions, or artistic blur overlays.
 ///
 /// The widget uses GPU-accelerated Fragment Shaders for high-performance rendering
-/// and supports customizable blur regions, quality settings, and smooth edge transitions.
+/// and supports customizable blur regions, quality settings, smooth edge transitions,
+/// and tint color effects.
 ///
 /// ## Key Features
 /// - Variable blur intensity across different regions
@@ -19,6 +20,7 @@ import 'package:variable_blur/src/models/blur_side_base.dart';
 /// - High-performance GPU-accelerated rendering
 /// - Quality control for performance optimization
 /// - Android device compatibility support
+/// - Customizable tint color for artistic effects
 ///
 /// ## Important Compatibility Note
 /// **Blur effects only work on images or colored containers.** The child widget must have
@@ -36,12 +38,13 @@ import 'package:variable_blur/src/models/blur_side_base.dart';
 /// ## Example Usage
 ///
 /// ```dart
-/// // Using normalized blur values (0.0 to 1.0)
+/// // Using normalized blur values (0.0 to 1.0) with tint color
 /// VariableBlur(
 ///   sigma: 15.0,
 ///   blurSides: BlurSides.vertical(top: 1.0, bottom: 0.3),
 ///   edgeIntensity: 0.2,
 ///   quality: BlurQuality.high,
+///   tintColor: Colors.blue.withOpacity(0.3),
 ///   useRepaintBoundary: true, // For performance optimization
 ///   child: Image.asset('assets/photo.jpg'),
 /// )
@@ -52,6 +55,7 @@ import 'package:variable_blur/src/models/blur_side_base.dart';
 ///   blurSides: ResponsiveBlurSides(top: 100.0, bottom: 50.0), // pixels
 ///   edgeIntensity: 0.2,
 ///   quality: BlurQuality.high,
+///   tintColor: Colors.transparent, // No tint
 ///   child: Image.asset('assets/photo.jpg'),
 /// )
 /// ```
@@ -63,6 +67,7 @@ import 'package:variable_blur/src/models/blur_side_base.dart';
 /// - Quality settings automatically adjust kernel size for optimal performance
 /// - RepaintBoundary is enabled by default to isolate expensive blur operations
 /// - Set [useRepaintBoundary] to false only if you need manual RepaintBoundary management
+/// - Tint color effects have minimal performance impact
 class VariableBlur extends StatelessWidget {
   /// Creates a [VariableBlur] widget.
   ///
@@ -74,6 +79,7 @@ class VariableBlur extends StatelessWidget {
   /// values (0.0-1.0) or [ResponsiveBlurSides] for pixel-based values that auto-scale to widget size.
   /// [quality] controls the rendering quality vs performance trade-off.
   /// [edgeIntensity] controls the smoothness of blur transitions (0.0 to 1.0).
+  /// [tintColor] applies a color overlay to the blurred regions. Use [Colors.transparent] for no tint.
   /// [isYFlipNeed] should be set to true on Android devices that flip the Y-axis.
   /// [useRepaintBoundary] isolates expensive blur operations for better performance.
   const VariableBlur(
@@ -83,6 +89,7 @@ class VariableBlur extends StatelessWidget {
       required this.blurSides,
       this.quality = BlurQuality.high,
       this.edgeIntensity = 0.15,
+      this.tintColor = Colors.transparent,
       this.isYFlipNeed = false,
       this.useRepaintBoundary = true});
 
@@ -104,6 +111,13 @@ class VariableBlur extends StatelessWidget {
 
   /// Controls the intensity of smooth edge transitions (0.0 to 1.0).
   final double edgeIntensity;
+
+  /// Tint color to apply to the blurred areas.
+  ///
+  /// The tint color is blended with the blurred content. Use [Colors.transparent]
+  /// for no tint effect. The alpha channel of the color controls the intensity
+  /// of the tint effect.
+  final Color tintColor;
 
   /// Whether to flip the Y-axis coordinate system.
   final bool isYFlipNeed;
@@ -140,7 +154,11 @@ class VariableBlur extends StatelessWidget {
               ..setFloat(6, normalizedBlurSides.right)
               ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
               ..setFloat(8, edgeIntensity)
-              ..setFloat(9, _getAdjustedKernelSize());
+              ..setFloat(9, _getAdjustedKernelSize())
+              ..setFloat(10, tintColor.red / 255.0)
+              ..setFloat(11, tintColor.green / 255.0)
+              ..setFloat(12, tintColor.blue / 255.0)
+              ..setFloat(13, tintColor.alpha / 255.0);
 
             verticalShader.setImageSampler(0, horizontalImage);
             verticalShader.setImageSampler(1, image); // Original for blending
@@ -179,7 +197,11 @@ class VariableBlur extends StatelessWidget {
       ..setFloat(5, normalizedBlurSides.left)
       ..setFloat(6, normalizedBlurSides.right)
       ..setFloat(7, !isYFlipNeed ? 0.0 : 1.0)
-      ..setFloat(8, _getAdjustedKernelSize());
+      ..setFloat(8, _getAdjustedKernelSize())
+      ..setFloat(9, tintColor.red / 255.0)
+      ..setFloat(10, tintColor.green / 255.0)
+      ..setFloat(11, tintColor.blue / 255.0)
+      ..setFloat(12, tintColor.alpha / 255.0);
 
     shader.setImageSampler(0, image);
 

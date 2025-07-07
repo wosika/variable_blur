@@ -11,6 +11,10 @@ uniform float leftExtent;
 uniform float rightExtent;
 uniform float isAndroid;
 uniform float kernelSize;
+uniform float tintR;
+uniform float tintG;
+uniform float tintB;
+uniform float tintA;
 uniform sampler2D uTexture;
 
 out vec4 FragColor;
@@ -33,7 +37,14 @@ void main() {
     
     // Early return if sigma is 0 - no blur needed
     if (sigma <= 0.0) {
-        FragColor = color;
+        // Apply tint color even without blur if tint alpha > 0
+        if (tintA > 0.0) {
+            vec3 tintColor = vec3(tintR, tintG, tintB);
+            vec3 blended = mix(color.rgb, tintColor, tintA);
+            FragColor = vec4(blended, color.a);
+        } else {
+            FragColor = color;
+        }
         return;
     }
     
@@ -76,5 +87,13 @@ void main() {
         weightSum += weight;
     }
     
-    FragColor = vec4(result / weightSum, color.a);
+    vec3 blurred = result / weightSum;
+    
+    // Apply tint color to blurred result
+    if (tintA > 0.0) {
+        vec3 tintColor = vec3(tintR, tintG, tintB);
+        blurred = mix(blurred, tintColor, tintA);
+    }
+    
+    FragColor = vec4(blurred, color.a);
 }

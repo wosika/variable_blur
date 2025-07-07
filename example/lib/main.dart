@@ -2,6 +2,7 @@ import 'package:example/screens/blur_transitions.dart';
 import 'package:example/screens/performance_comparison.dart';
 import 'package:example/screens/scroll_blur_header.dart';
 import 'package:example/screens/tilt_shift_photography.dart';
+import 'package:example/screens/tint_color_showcase.dart';
 import 'package:example/screens/wallpaper_gallery.dart';
 import 'package:flutter/material.dart';
 import 'package:example/screens/gradual_top_blur.dart';
@@ -131,6 +132,19 @@ class ExampleShowcase extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const PerformanceComparison(),
+                    ),
+                  ),
+                ),
+                 _buildExampleCard(
+                  context,
+                  'Tint Color',
+                  'Tint color effects',
+                  Icons.color_lens,
+                  Colors.orange,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TintColorShowcase(),
                     ),
                   ),
                 ),
